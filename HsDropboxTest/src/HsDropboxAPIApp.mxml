@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					    width="1000" height="600"
+					   applicationComplete="appCompleteHandler()">
+	<fx:Declarations>
+	</fx:Declarations>
+	<fx:Script source="HsDropboxAPIAppAs.as" />
+	<mx:VBox width="100%" height="100%">
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Request Token" click="getRequestToken()" />
+			<s:TextInput id="reqTokenKeyLabel" />
+			<s:TextInput id="reqTokenSecretLabel" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Access Token" click="getAccessToken()" />
+			<s:TextInput id="accTokenKeyLabel" />
+			<s:TextInput id="accTokenSecretLabel" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Account Info" click="accountInfo()" />
+			<s:TextInput id="accountInfoLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Upload File" click="uploadFile()" />
+			<s:TextInput id="uploadFileLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Copy File" click="copyFile()" />
+			<s:TextInput id="copyFileLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Create Folder" click="createFolder()" />
+			<s:TextInput id="createFolderLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Move File" click="moveFile()" />
+			<s:TextInput id="moveFileLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Delete File" click="deleteFile()" />
+			<s:TextInput id="deleteFileLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Get File" click="getFile()" />
+			<s:TextInput id="getFileLabel" width="100%" />
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Metadata" click="metadata()" />
+			<s:TextInput id="metadataLabel" width="100%" />
+		</mx:FormItem>
+	</mx:VBox>
+</s:WindowedApplication>
