@@ -50,5 +50,9 @@
 			<s:Button label="Metadata" click="metadata()" />
 			<s:TextInput id="metadataLabel" width="100%" />
 		</mx:FormItem>
+		<mx:FormItem direction="horizontal" width="100%">
+			<s:Button label="Thumbnails" click="thumbnails()" />
+			<s:TextInput id="thumbnailsLabel" width="100%" />
+		</mx:FormItem>
 	</mx:VBox>
 </s:WindowedApplication>

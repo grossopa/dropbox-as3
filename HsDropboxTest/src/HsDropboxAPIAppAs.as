@@ -18,9 +18,9 @@ public var dropAPI:DropboxClient;
 public function appCompleteHandler():void
 {
 	var config:DropboxConfig = new DropboxConfig();
-//	config.setConsumer('input your test secret here', 'input your test secret here');
-//	config.setRequestToken('input your request token key here', 'input you request token secret here');
-//	config.setAccessToken('input user's access token key here', 'input user's access token secret here');
+	config.setConsumer('', '');
+//	config.setRequestToken('', '');
+//	config.setAccessToken('', '');
 	dropAPI = new DropboxClient(config);
 }
 
@@ -33,6 +33,7 @@ public function getRequestToken():void
 		var obj:Object = evt.resultObject;
 		reqTokenKeyLabel.text = obj.key;
 		reqTokenSecretLabel.text = obj.secret;
+		// goto authorization web page to authorize, after that, call get access token 
 		Alert.show(dropAPI.authorizationUrl);
 	};
 	dropAPI.addEventListener(DropboxEvent.REQUEST_TOKEN_RESULT, handler);
@@ -189,6 +190,20 @@ public function metadata():void
 	dropAPI.addEventListener(DropboxEvent.METADATA_RESULT, handler);
 	if (!dropAPI.hasEventListener(DropboxEvent.METADATA_FAULT)) {
 		dropAPI.addEventListener(DropboxEvent.METADATA_FAULT, faultHandler);
+	}	
+}
+
+public function thumbnails():void
+{
+	dropAPI.thumbnails('test.jpg', "");
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.THUMBNAILS_RESULT, handler);
+		thumbnailsLabel.text = ByteArray(evt.resultObject).length.toString();
+	};
+	dropAPI.addEventListener(DropboxEvent.THUMBNAILS_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.THUMBNAILS_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.THUMBNAILS_FAULT, faultHandler);
 	}	
 }
 

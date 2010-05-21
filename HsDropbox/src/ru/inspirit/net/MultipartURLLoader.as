@@ -55,8 +55,10 @@ package ru.inspirit.net
 	 * problem and fix reported by gbradley@rocket.co.uk
 	 *
 	 * @author Eugene Zatepyakin
-	 * @version 1.3
+	 * @version 1.3-for dropbox
 	 * @link http://blog.inspirit.ru/
+	 * 
+	 * @modified 5/19/2010 by zeshuoyin, for Dropbox specified usage.
 	 */
 	public class  MultipartURLLoader extends EventDispatcher
 	{

@@ -68,9 +68,7 @@ package org.hamster.dropbox
 	 * has been called, you can register other listeners if you want. After the request is
 	 * done, the corresponding event will be dispatched from this class.
 	 * 
-	 * 
 	 * @author yinzeshuo
-	 * 
 	 */
 	public class DropboxClient extends EventDispatcher
 	{
@@ -83,7 +81,6 @@ package org.hamster.dropbox
 		 * @private
 		 */
 		private var _config:DropboxConfig;
-		
 		
 		/**
 		 * @private
@@ -195,7 +192,7 @@ package org.hamster.dropbox
 		 * metadata information in JSON format.
 		 * 
 		 * @param path
-		 * @param root
+		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
 		 */
 		public function fileCreateFolder(path:String, 
@@ -214,8 +211,8 @@ package org.hamster.dropbox
 		/** 
 		 * Delete a file.
 		 * 
-		 * @param full file path
-		 * @param root
+		 * @param path full file path
+		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
 		 */
 		public function fileDelete(path:String, 
@@ -237,7 +234,7 @@ package org.hamster.dropbox
 		 * 
 		 * @param fromPath
 		 * @param toPath
-		 * @param root
+		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
 		 */
 		public function fileMove(fromPath:String, toPath:String, 
@@ -261,15 +258,12 @@ package org.hamster.dropbox
 		 * @param fileLimit
 		 * @param hash
 		 * @param list if query a directory, true to show sub list.
-		 * @param root
+		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
 		 */
 		public function metadata(path:String, 
-								 fileLimit:int, 
-								 hash:String, 
-								 list:Boolean,
-								 root:String = DropboxConfig.SANDBOX
-		):URLLoader
+			fileLimit:int, hash:String, list:Boolean,
+			root:String = DropboxConfig.SANDBOX):URLLoader
 		{
 			var params:Object = {
 				"file_limit" : fileLimit,
@@ -281,16 +275,36 @@ package org.hamster.dropbox
 				config.server, "/metadata/" + root + '/' + path, params);
 			return this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
-		}		
+		}
+		
+		/**
+		 * Get thumbnails of a photo, dispatch a fault event if no thumbnails available 
+		 * or photo doesn't exist.
+		 * 
+		 * @param pathToPhoto
+		 * @param size optional, small|medium|large, medium as default
+		 * @param root, optional, default is "sandbox"
+		 * @return urlLoader
+		 */
+		public function thumbnails(pathToPhoto:String, size:String = "",
+								 root:String = DropboxConfig.SANDBOX):URLLoader
+		{
+			var params:Object = {
+				"size" : size
+			};
+			var urlRequest:URLRequest = buildURLRequest(
+				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
+			return this.load(urlRequest, DropboxEvent.THUMBNAILS_RESULT, 
+				DropboxEvent.THUMBNAILS_FAULT, "", URLLoaderDataFormat.BINARY);
+		}	
 		
 		/**
 		 * Get a file from the content server, returning the raw Apache HTTP Components response object
 		 * so you can stream it or work with it how you need. 
 		 * 
 		 * @param filePath
-		 * @param root
+		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
-		 * 
 		 */
 		public function getFile(filePath:String, 
 								root:String=DropboxConfig.SANDBOX):URLLoader
@@ -307,7 +321,7 @@ package org.hamster.dropbox
 		 * @param filePath
 		 * @param fileName
 		 * @param data
-		 * @param root
+		 * @param root, optional, default is "sandbox"
 		 * @return multipartURLLoader
 		 */
 		public function putFile(filePath:String, 
@@ -332,6 +346,16 @@ package org.hamster.dropbox
 			return m;
 		}
 		
+		/**
+		 * Build a OAuth URL request.
+		 *  
+		 * @param apiHost
+		 * @param target
+		 * @param params
+		 * @param httpMethod
+		 * @param protocol
+		 * @return built URL request
+		 */
 		protected function buildURLRequest(apiHost:String, target:String, params:Object,
 									    httpMethod:String = URLRequestMethod.GET,
 									    protocol:String = 'http'):URLRequest
@@ -350,6 +374,16 @@ package org.hamster.dropbox
 			return urlRequest;
 		}
 		
+		/**
+		 * Load a URL request.
+		 * 
+		 * @param urlRequest
+		 * @param evtResultType
+		 * @param evtFaultType
+		 * @param resultType
+		 * @param dataFormat
+		 * @return urlLoader
+		 */
 		protected function load(urlRequest:URLRequest, 
 								evtResultType:String, evtFaultType:String,
 								resultType:String = null,
@@ -370,52 +404,95 @@ package org.hamster.dropbox
 			return urlLoader;
 		}
 		
+		/**
+		 * @private
+		 * 
+		 * Listener function when urlLoader is load complete.
+		 * The result will be formatted to object if the type is set in
+		 * DropboxURLLoader.
+		 *  
+		 * @param evt
+		 */
 		protected function loadCompleteHandler(evt:Event):void
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			var resultObject:*;
-			
-			if (urlLoader.resultType == REQUEST_TOKEN) {
-				var requestToken:Object = OAuthHelper.getTokenFromResponse(urlLoader.data);
-				this.config.requestTokenKey = requestToken.key;
-				this.config.requestTokenSecret = requestToken.secret;
-				resultObject = requestToken;
-			} else if (urlLoader.resultType == ACCESS_TOKEN) {
-				var accessToken:Object = OAuthHelper.getTokenFromResponse(urlLoader.data);
-				this.config.accessTokenKey = accessToken.key;
-				this.config.accessTokenSecret = accessToken.secret;
-				resultObject = accessToken;
-			} else if (urlLoader.resultType == ACCOUNT_INFO) {
-				var accountInfo:AccountInfo = new AccountInfo();
-				accountInfo.decode(JSON.decode(urlLoader.data));
-				resultObject = accountInfo;
-			} else if (urlLoader.resultType == DROPBOX_FILE) {
-				var dropboxFile:DropboxFile = new DropboxFile();
-				dropboxFile.decode(JSON.decode(urlLoader.data));
-				resultObject = dropboxFile;
-			} else {
-				resultObject = urlLoader.data;
+			try {
+				if (urlLoader.resultType == REQUEST_TOKEN) {
+					var requestToken:Object = OAuthHelper.getTokenFromResponse(urlLoader.data);
+					this.config.requestTokenKey = requestToken.key;
+					this.config.requestTokenSecret = requestToken.secret;
+					resultObject = requestToken;
+				} else if (urlLoader.resultType == ACCESS_TOKEN) {
+					var accessToken:Object = OAuthHelper.getTokenFromResponse(urlLoader.data);
+					this.config.accessTokenKey = accessToken.key;
+					this.config.accessTokenSecret = accessToken.secret;
+					resultObject = accessToken;
+				} else if (urlLoader.resultType == ACCOUNT_INFO) {
+					var accountInfo:AccountInfo = new AccountInfo();
+					accountInfo.decode(JSON.decode(urlLoader.data));
+					resultObject = accountInfo;
+				} else if (urlLoader.resultType == DROPBOX_FILE) {
+					var dropboxFile:DropboxFile = new DropboxFile();
+					dropboxFile.decode(JSON.decode(urlLoader.data));
+					resultObject = dropboxFile;
+				} else {
+					resultObject = urlLoader.data;
+				}
+			} catch (e:Error) {
+				this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, e);
+				return;
 			}
 			
 			this.dispatchDropboxEvent(urlLoader.eventResultType, evt, resultObject);
 		}
 		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request. 
+		 *  
+		 * @param evt
+		 */
 		protected function uploadCompleteHandler(evt:Event):void
 		{
 			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
 			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_RESULT, evt, m.loader.data);
 		}
 		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request.
+		 *  
+		 * @param evt
+		 * 
+		 */
 		protected function uploadIOErrorHandler(evt:IOErrorEvent):void
 		{
 			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, null);
 		}
 		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request.
+		 *  
+		 * @param evt
+		 * 
+		 */
 		protected function uploadSecurityErrorHandler(evt:SecurityErrorEvent):void
 		{
 			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, null);
 		}
 		
+		/**
+		 * dispatch a dropbox event.
+		 *  
+		 * @param evtType
+		 * @param relatedEvent
+		 * @param resultObject
+		 */
 		protected function dispatchDropboxEvent(
 			evtType:String, relatedEvent:Event, resultObject:Object):void
 		{
@@ -425,18 +502,36 @@ package org.hamster.dropbox
 			this.dispatchEvent(dropboxEvent);
 		}
 		
+		/**
+		 * @private
+		 * 
+		 * @param evt
+		 */
 		protected function ioErrorHandler(evt:IOErrorEvent):void
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, null);
 		}
 		
+		/**
+		 * @private
+		 *  
+		 * @param evt
+		 */
 		protected function securityErrorHandler(evt:SecurityErrorEvent):void
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, null);
 		}
 			
+		/**
+		 * build full URL string by given values.
+		 *  
+		 * @param host
+		 * @param target
+		 * @param protocol
+		 * @return built string
+		 */
 		protected function buildFullURL(host:String, target:String, protocol:String = 'http'):String
 		{
 			var portString:String = (_config.port == 80) ? "" : (":" + _config.port);

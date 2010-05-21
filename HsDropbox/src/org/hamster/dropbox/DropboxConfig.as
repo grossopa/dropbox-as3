@@ -1,6 +1,12 @@
 package org.hamster.dropbox
 {
 
+	/**
+	 * Dropbox Client configuration
+	 * 
+	 * @author yinzeshuo
+	 * 
+	 */
 	public class DropboxConfig
 	{
 		public static const API_VERSION:int = 0;
@@ -28,6 +34,25 @@ package org.hamster.dropbox
 		public var authorizationUrl:String;
 		public var root:String;
 		
+		/**
+		 * @private
+		 *  
+		 * @param consumerKey
+		 * @param consumerSecret
+		 * @param requestTokenKey
+		 * @param requestTokenSecret
+		 * @param accessTokenKey
+		 * @param accessTokenSecret
+		 * @param apiVersion
+		 * @param server
+		 * @param contentServer
+		 * @param port
+		 * @param requestTokenUrl
+		 * @param accessTokenUrl
+		 * @param authorizationUrl
+		 * @param root
+		 * 
+		 */
 		public function DropboxConfig(
 			consumerKey:String = "",consumerSecret:String = "",
 			requestTokenKey:String = "", requestTokenSecret:String = "",
@@ -51,6 +76,14 @@ package org.hamster.dropbox
 			this.authorizationUrl = authorizationUrl;
 		}
 		
+		/**
+		 * It's recommended to use this function rather than set key/secret manaually.
+		 * It will help you to check whether key/secret are both exists.
+		 *  
+		 * @param key
+		 * @param secret
+		 * @throws Error if key is not empty but secret is empty
+		 */
 		public function setConsumer(key:String, secret:String):void
 		{
 			if (!isEmpty(key) && isEmpty(secret)) {
@@ -60,6 +93,14 @@ package org.hamster.dropbox
 			this.consumerSecret = secret;
 		}
 		
+		/**
+		 * It's recommended to use this function rather than set key/secret manaually.
+		 * It will help you to check whether key/secret are both exists.
+		 *  
+		 * @param key
+		 * @param secret
+		 * @throws Error if key is not empty but secret is empty
+		 */
 		public function setRequestToken(key:String, secret:String):void
 		{
 			if (!isEmpty(key) && isEmpty(secret)) {
@@ -69,6 +110,14 @@ package org.hamster.dropbox
 			this.requestTokenSecret = secret;
 		}
 		
+		/**
+		 * It's recommended to use this function rather than set key/secret manaually.
+		 * It will help you to check whether key/secret are both exists.
+		 *  
+		 * @param key
+		 * @param secret
+		 * @throws Error if key is not empty but secret is empty
+		 */
 		public function setAccessToken(key:String, secret:String):void
 		{
 			if (!isEmpty(key) && isEmpty(secret)) {
@@ -78,7 +127,12 @@ package org.hamster.dropbox
 			this.accessTokenSecret = secret;
 		}
 		
-		public static function isEmpty(str:String):Boolean
+		/**
+		 * @private
+		 * 
+		 * Check whether the string is empty.
+		 */
+		protected static function isEmpty(str:String):Boolean
 		{
 			return str != null && str.length > 0;
 		}

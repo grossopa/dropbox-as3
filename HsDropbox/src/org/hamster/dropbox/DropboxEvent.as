@@ -24,6 +24,8 @@ package org.hamster.dropbox
 		public static const GET_FILE_FAULT:String = 'DropboxEvent_GetFileFault';
 		public static const METADATA_RESULT:String = 'DropboxEvent_MetadataResult';
 		public static const METADATA_FAULT:String = 'DropboxEvent_MetadataFault';
+		public static const THUMBNAILS_RESULT:String = 'DropboxEvent_ThumbnailsResult';
+		public static const THUMBNAILS_FAULT:String = 'DropboxEvent_ThumbnailsFault';
 		
 		public var relatedEvent:Event;
 		public var resultObject:Object;
