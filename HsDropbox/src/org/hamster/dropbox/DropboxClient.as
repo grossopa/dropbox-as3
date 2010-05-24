@@ -256,7 +256,7 @@ package org.hamster.dropbox
 		 * 
 		 * @param path
 		 * @param fileLimit
-		 * @param hash
+		 * @param hash pass a hash value to perform better performance
 		 * @param list if query a directory, true to show sub list.
 		 * @param root, optional, default is "sandbox"
 		 * @return urlLoader
@@ -487,6 +487,8 @@ package org.hamster.dropbox
 		}
 		
 		/**
+		 * @private
+		 * 
 		 * dispatch a dropbox event.
 		 *  
 		 * @param evtType
@@ -545,11 +547,33 @@ package org.hamster.dropbox
 	}
 }
 
+
 import flash.net.URLLoader;
 
+/**
+ * Internal class. Extends flash.net.URLLoader, add 3 properties. 
+ * 
+ * @author yinzeshuo
+ * 
+ */
 internal class DropboxURLLoader extends URLLoader
 {
+	/**
+	 * define class type of result, can be REQUEST_TOKEN|ACCESS_TOKEN|ACCOUNT_INFO|DROPBOX_FILE.
+	 * 
+	 * REQUEST_TOKEN & ACCESS_TOKEN : set to DropboxConfig when type is requestToken & accessToken.
+	 * ACCOUNT_INFO : return an AccountInfo object
+	 * DROPBOX_FILE : return an DropboxFile object
+	 * others : return response string.
+	 */
 	public var resultType:String;
+	
+	/**
+	 * define dispatch event type
+	 */
 	public var eventResultType:String;
+	/**
+	 * define dispatch event type
+	 */
 	public var eventFaultType:String;
 }

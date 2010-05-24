@@ -7,15 +7,6 @@ package org.hamster.dropbox.models
 	import mx.utils.ArrayUtil;
 	import mx.utils.ObjectUtil;
 
-// {"thumb_exists": false,
-//	"bytes": 736, 
-//	"modified": "Wed, 12 May 2010 07:28:39 +0000", 
-//	"path": "/id_dsa1273649318857", 
-//	"is_dir": false, 
-//	"icon": "page_white", 
-//	"root": "sandbox", 
-//	"mime_type": "application/octet-stream",
-//	"size": "736 bytes"}
 	public class DropboxFile extends DropboxModelSupport
 	{
 		public var thumbExists:Boolean;

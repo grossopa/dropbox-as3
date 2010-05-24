@@ -1,6 +1,5 @@
 package org.hamster.dropbox
 {
-
 	/**
 	 * Dropbox Client configuration
 	 * 
@@ -25,55 +24,60 @@ package org.hamster.dropbox
 		public var requestTokenSecret:String;
 		public var accessTokenKey:String;
 		public var accessTokenSecret:String;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var apiVersion:int;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var server:String;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var contentServer:String;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var port:int;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var requestTokenUrl:String;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var accessTokenUrl:String;
+		/**
+		 *  Optional, do not manually set it only if Dropbox API changed.
+		 */
 		public var authorizationUrl:String;
-		public var root:String;
 		
 		/**
-		 * @private
+		 * Constructor
 		 *  
 		 * @param consumerKey
 		 * @param consumerSecret
-		 * @param requestTokenKey
-		 * @param requestTokenSecret
-		 * @param accessTokenKey
-		 * @param accessTokenSecret
-		 * @param apiVersion
-		 * @param server
-		 * @param contentServer
-		 * @param port
-		 * @param requestTokenUrl
-		 * @param accessTokenUrl
-		 * @param authorizationUrl
-		 * @param root
-		 * 
+		 * @param requestTokenKey optional
+		 * @param requestTokenSecret optional
+		 * @param accessTokenKey optional
+		 * @param accessTokenSecret optional
 		 */
 		public function DropboxConfig(
-			consumerKey:String = "",consumerSecret:String = "",
+			consumerKey:String, consumerSecret:String,
 			requestTokenKey:String = "", requestTokenSecret:String = "",
-			accessTokenKey:String = "", accessTokenSecret:String = "",
-			apiVersion:int = API_VERSION, server:String = SERVER,
-			contentServer:String = CONETENT_SERVER, port:int = PORT,
-			requestTokenUrl:String = REQUEST_TOKEN_URL, 
-			accessTokenUrl:String = ACCESS_TOKEN_URL,
-			authorizationUrl:String = AUTHORIZATION_URL,
-			root:String = SANDBOX)
+			accessTokenKey:String = "", accessTokenSecret:String = "")
 		{
 			this.setConsumer(consumerKey, consumerSecret);
 			this.setRequestToken(requestTokenKey, requestTokenSecret);
 			this.setAccessToken(accessTokenKey, accessTokenSecret);
-			this.apiVersion = apiVersion;
-			this.server = server;
-			this.contentServer = contentServer;
-			this.port = port;
-			this.requestTokenUrl = requestTokenUrl;
-			this.accessTokenUrl = accessTokenUrl;
-			this.authorizationUrl = authorizationUrl;
+			this.apiVersion = API_VERSION;
+			this.server = SERVER;
+			this.contentServer = CONTENT_SERVER;
+			this.port = PORT;
+			this.requestTokenUrl = REQUEST_TOKEN_URL;
+			this.accessTokenUrl = ACCESS_TOKEN_URL;
+			this.authorizationUrl = AUTHORIZATION_URL;
 		}
 		
 		/**

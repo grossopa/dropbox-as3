@@ -2,6 +2,12 @@ package org.hamster.dropbox
 {
 	import flash.events.Event;
 	
+	/**
+	 * Dropbox Event.
+	 *  
+	 * @author yinzeshuo
+	 * 
+	 */
 	public class DropboxEvent extends Event
 	{
 		public static const REQUEST_TOKEN_RESULT:String = 'DropboxEvent_RequestTokenResult';
@@ -27,14 +33,37 @@ package org.hamster.dropbox
 		public static const THUMBNAILS_RESULT:String = 'DropboxEvent_ThumbnailsResult';
 		public static const THUMBNAILS_FAULT:String = 'DropboxEvent_ThumbnailsFault';
 		
+		/**
+		 * related URLLoader Event. 
+		 */
 		public var relatedEvent:Event;
+		/**
+		 * result Object
+		 * 1. object{key:'', secret:''} when you called DropboxClient.requestToken() or DropboxClient.accessToken()
+		 * 2. AccountInfo when you called accountInfo()
+		 * 3. DropboxFile when you called files API
+		 * 4. ByteArray when you called getFile()
+		 * 5. response string.
+		 */
 		public var resultObject:Object;
 		
+		/**
+		 * Constructor
+		 *  
+		 * @param type
+		 * @param bubbles
+		 * @param cancelable
+		 */
 		public function DropboxEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
 		}
 		
+		/**
+		 * clone function.
+		 *  
+		 * @return a cloned instance of DropboxEvent
+		 */
 		override public function clone():Event
 		{
 			var result:DropboxEvent = new DropboxEvent(type, bubbles, cancelable);
