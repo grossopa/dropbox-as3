@@ -12,12 +12,33 @@ package org.hamster.dropbox.utils
 	import mx.utils.ObjectUtil;
 	import mx.utils.UIDUtil;
 
+	/**
+	 * a refactor util class from org.iotashan.oauth.OAuthRequest
+	 * 
+	 * @author yinzeshuo
+	 * 
+	 */
 	public class OAuthHelper
 	{
 		public function OAuthHelper()
 		{
 		}
 		
+		/**
+		 * Build a OAuth Request header.
+		 *  
+		 * @param url the target URL, should not contain parameters like ?a=b&c=d
+		 * @param params parameters used in GET or POST methods.
+		 * @param consumerKey consumer key provided by Web Service.
+		 * @param consumerSecret consumer secret of consumer key
+		 * @param tokenKey can be either access token key or request token key
+		 * @param tokenSecret can be either access token secret or request token secret
+		 * @param httpMethod
+		 * @param headerRealm
+		 * @param signMethod can be either PLAINTEXT or HMAC-SHA1
+		 * @return 
+		 * 
+		 */
 		public static function buildURLRequestHeader(url:String, 
 													 params:Object, 
 													 consumerKey:String,
@@ -28,8 +49,11 @@ package org.hamster.dropbox.utils
 													 headerRealm:String = "",
 													 signMethod:String = "HMAC-SHA1"):URLRequestHeader
 		{
+			// build parameters object first
 			var builtParams:Object = buildParams(url, params, 
 				consumerKey, consumerSecret, tokenKey, tokenSecret, httpMethod, signMethod);
+			
+			// format to string
 			var data:String = "";
 			
 			data += "OAuth "
@@ -53,17 +77,22 @@ package org.hamster.dropbox.utils
 					data += param + "=\"" + paramValue + "\"";
 				}
 			}
-			
+			// return URLRequestHeader
 			return new URLRequestHeader("Authorization", data);
 		}
 		
 		/**
-		 * a refactor function from org.iotashan.oauth.OAuthRequest
-		 *  
+		 * build parameter object
+		 * 
 		 * @param url
 		 * @param params
-		 * @return 
-		 * 
+		 * @param consumerKey
+		 * @param consumerSecret
+		 * @param tokenKey
+		 * @param tokenSecret
+		 * @param httpMethod
+		 * @param signMethod
+		 * @return parameters object
 		 */
 		public static function buildParams(url:String, 
 										   params:Object, 
@@ -108,6 +137,16 @@ package org.hamster.dropbox.utils
 			return result;
 		}
 		
+		/**
+		 * sign request by HMAC-SHA1
+		 *  
+		 * @param url
+		 * @param params
+		 * @param consumerSecret
+		 * @param tokenSecret
+		 * @param httpMethod
+		 * @return signed string
+		 */
 		public static function sign_HMAC_SHA1(url:String, 
 											  params:Object, 
 											  consumerSecret:String,
@@ -132,6 +171,17 @@ package org.hamster.dropbox.utils
 			return ret;
 		}
 		
+		/**
+		 * sign request by PLAINTEXT
+		 * 
+		 * @param url
+		 * @param params
+		 * @param consumerSecret
+		 * @param tokenSecret
+		 * @param httpMethod
+		 * @return signed string
+		 * 
+		 */
 		public static function sign_PLAINTEXT(url:String, 
 											  params:Object, 
 											  consumerSecret:String,

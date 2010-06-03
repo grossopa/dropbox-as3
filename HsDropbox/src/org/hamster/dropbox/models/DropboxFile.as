@@ -7,6 +7,11 @@ package org.hamster.dropbox.models
 	import mx.utils.ArrayUtil;
 	import mx.utils.ObjectUtil;
 
+	/**
+	 * either a dropbox file or a dropbox folder.
+	 * 
+	 * @author yinzeshuo
+	 */
 	public class DropboxFile extends DropboxModelSupport
 	{
 		public var thumbExists:Boolean;
@@ -25,6 +30,11 @@ package org.hamster.dropbox.models
 		{
 		}
 		
+		/**
+		 * decode a object
+		 *  
+		 * @param result
+		 */
 		override public function decode(result:Object):void
 		{
 			super.decode(result);

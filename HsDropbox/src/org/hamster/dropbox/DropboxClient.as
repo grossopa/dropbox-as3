@@ -296,7 +296,7 @@ package org.hamster.dropbox
 				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
 			return this.load(urlRequest, DropboxEvent.THUMBNAILS_RESULT, 
 				DropboxEvent.THUMBNAILS_FAULT, "", URLLoaderDataFormat.BINARY);
-		}	
+		}
 		
 		/**
 		 * Get a file from the content server, returning the raw Apache HTTP Components response object

@@ -2,6 +2,12 @@ package org.hamster.dropbox.models
 {
 	import mx.utils.ObjectUtil;
 
+	/**
+	 * Account information of a user.
+	 *  
+	 * @author yinzeshuo
+	 * 
+	 */
 	public class AccountInfo extends DropboxModelSupport
 	{
 		[Bindable] public var uid:int;
