@@ -1,3 +1,6 @@
+/**
+ * Issue 4: add fail information to DropboxEvent.resultObject;
+ */
 package org.hamster.dropbox
 {
 	import com.adobe.serialization.json.JSON;
@@ -470,7 +473,8 @@ package org.hamster.dropbox
 		 */
 		protected function uploadIOErrorHandler(evt:IOErrorEvent):void
 		{
-			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, null);
+			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
+			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.loader.data);
 		}
 		
 		/**
@@ -483,7 +487,8 @@ package org.hamster.dropbox
 		 */
 		protected function uploadSecurityErrorHandler(evt:SecurityErrorEvent):void
 		{
-			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, null);
+			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
+			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.loader.data);
 		}
 		
 		/**
@@ -512,7 +517,7 @@ package org.hamster.dropbox
 		protected function ioErrorHandler(evt:IOErrorEvent):void
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
-			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, null);
+			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, urlLoader.data);
 		}
 		
 		/**
@@ -523,7 +528,7 @@ package org.hamster.dropbox
 		protected function securityErrorHandler(evt:SecurityErrorEvent):void
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
-			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, null);
+			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, urlLoader.data);
 		}
 			
 		/**
