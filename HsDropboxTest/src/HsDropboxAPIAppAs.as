@@ -17,10 +17,10 @@ public var dropAPI:DropboxClient;
 
 public function appCompleteHandler():void
 {
-	var config:DropboxConfig = new DropboxConfig();
-	config.setConsumer('', '');
+	var config:DropboxConfig = new DropboxConfig('', '');
+	//config.setConsumer();
 //	config.setRequestToken('', '');
-//	config.setAccessToken('', '');
+	config.setAccessToken('', '');
 	dropAPI = new DropboxClient(config);
 }
 
@@ -181,7 +181,7 @@ public function getFile():void
 
 public function metadata():void
 {
-	dropAPI.metadata(testFolder1 + '', 1000, "", true);
+	dropAPI.metadata('id_dsa' + '', 1000, "", true);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.METADATA_RESULT, handler);
@@ -209,5 +209,5 @@ public function thumbnails():void
 
 private function faultHandler(evt:Event):void
 {
-	Alert.show(evt.toString());
+	Alert.show((evt as Object).resultObject);
 }
