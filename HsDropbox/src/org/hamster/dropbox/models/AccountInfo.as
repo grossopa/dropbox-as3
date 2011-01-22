@@ -1,7 +1,5 @@
 package org.hamster.dropbox.models
 {
-	import mx.utils.ObjectUtil;
-
 	/**
 	 * Account information of a user.
 	 *  

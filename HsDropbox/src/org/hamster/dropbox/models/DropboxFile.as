@@ -1,12 +1,5 @@
 package org.hamster.dropbox.models
 {
-	import com.adobe.utils.ArrayUtil;
-	import com.hurlant.util.ArrayUtil;
-	
-	import mx.collections.ArrayCollection;
-	import mx.utils.ArrayUtil;
-	import mx.utils.ObjectUtil;
-
 	/**
 	 * either a dropbox file or a dropbox folder.
 	 * 
@@ -22,6 +15,7 @@ package org.hamster.dropbox.models
 		public var root:String;
 		public var mimeType:String;
 		public var size:String;
+		public var path:String;
 		
 		public var hash:String;
 		public var contents:Array;
@@ -47,6 +41,7 @@ package org.hamster.dropbox.models
 			this.root = result['root'];
 			this.mimeType = result['mime_type'];
 			this.size = result['size'];
+			this.path = result['path'];
 			
 			this.hash = result['hash'];
 			
@@ -67,6 +62,7 @@ package org.hamster.dropbox.models
 			s	+=  ", mimeType=" + (mimeType == null ? "null" : mimeType)
 			s	+=  ", modified=" + (modified == null ? "null" : modified.toString())
 			s	+=  ", root=" + (root == null ? "null" : root)
+			s	+=  ", path=" + (path == null ? "null" : path)
 			s	+=  ", size=" + (size == null ? "null" : size)
 			s	+=  ", thumbExists=" + thumbExists
 			s	+=  ", contents=" + (contents == null || contents.length == 0 ? "null" : contents.join()) + "]";

@@ -17,8 +17,6 @@ package org.hamster.dropbox
 	import flash.net.URLRequestMethod;
 	import flash.utils.ByteArray;
 	
-	import mx.containers.Canvas;
-	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
 	
 	import org.hamster.dropbox.models.AccountInfo;
@@ -173,11 +171,11 @@ package org.hamster.dropbox
 		 * 
 		 * @param fromPath
 		 * @param toPath
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function fileCopy(fromPath:String, toPath:String, 
-								 root:String = DropboxConfig.SANDBOX):URLLoader
+								 root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = { 
 				"root": root, 
@@ -195,11 +193,11 @@ package org.hamster.dropbox
 		 * metadata information in JSON format.
 		 * 
 		 * @param path
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function fileCreateFolder(path:String, 
-			root:String = DropboxConfig.SANDBOX):URLLoader
+			root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = { 
 				"root": root, 
@@ -215,11 +213,11 @@ package org.hamster.dropbox
 		 * Delete a file.
 		 * 
 		 * @param path full file path
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function fileDelete(path:String, 
-			root:String = DropboxConfig.SANDBOX):URLLoader
+			root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = { 
 				"root": root, 
@@ -237,11 +235,11 @@ package org.hamster.dropbox
 		 * 
 		 * @param fromPath
 		 * @param toPath
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function fileMove(fromPath:String, toPath:String, 
-								 root:String = DropboxConfig.SANDBOX):URLLoader
+								 root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = { 
 				"root" : root, 
@@ -261,12 +259,12 @@ package org.hamster.dropbox
 		 * @param fileLimit
 		 * @param hash pass a hash value to perform better performance
 		 * @param list if query a directory, true to show sub list.
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function metadata(path:String, 
 			fileLimit:int, hash:String, list:Boolean,
-			root:String = DropboxConfig.SANDBOX):URLLoader
+			root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = {
 				"file_limit" : fileLimit,
@@ -286,11 +284,11 @@ package org.hamster.dropbox
 		 * 
 		 * @param pathToPhoto
 		 * @param size optional, small|medium|large, medium as default
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function thumbnails(pathToPhoto:String, size:String = "",
-								 root:String = DropboxConfig.SANDBOX):URLLoader
+								 root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = {
 				"size" : size
@@ -306,11 +304,11 @@ package org.hamster.dropbox
 		 * so you can stream it or work with it how you need. 
 		 * 
 		 * @param filePath
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function getFile(filePath:String, 
-								root:String=DropboxConfig.SANDBOX):URLLoader
+								root:String=DropboxConfig.DROPBOX):URLLoader
 		{
 			var urlRequest:URLRequest = buildURLRequest(
 				config.contentServer, "/files/" + root + '/' + filePath, null);
@@ -324,13 +322,13 @@ package org.hamster.dropbox
 		 * @param filePath
 		 * @param fileName
 		 * @param data
-		 * @param root, optional, default is "sandbox"
+		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return multipartURLLoader
 		 */
 		public function putFile(filePath:String, 
 								fileName:String, 
 								data:ByteArray, 
-								root:String = DropboxConfig.SANDBOX):MultipartURLLoader
+								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
 			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + filePath);
 			var params:Object = { 
