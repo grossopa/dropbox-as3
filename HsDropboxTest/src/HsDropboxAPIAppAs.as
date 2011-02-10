@@ -13,14 +13,14 @@ import org.hamster.dropbox.DropboxEvent;
 import org.hamster.dropbox.models.AccountInfo;
 import org.hamster.dropbox.models.DropboxFile;
 
-public var dropAPI:DropboxClient;
+[Bindable] public var dropAPI:DropboxClient;
 
 public function appCompleteHandler():void
 {
-	var config:DropboxConfig = new DropboxConfig('wnl0erseogu50mk', 'eypos93aukcysdw');
+	var config:DropboxConfig = new DropboxConfig('', '');
 	//config.setConsumer();
 //	config.setRequestToken('', '');
-	//config.setAccessToken('ra0fl8qwmyegkge', 'rpnc89sa5sv8km8');
+	//config.setAccessToken('', '');
 	dropAPI = new DropboxClient(config);
 }
 
@@ -34,11 +34,30 @@ public function getRequestToken():void
 		reqTokenKeyLabel.text = obj.key;
 		reqTokenSecretLabel.text = obj.secret;
 		// goto authorization web page to authorize, after that, call get access token 
-		Alert.show(dropAPI.authorizationUrl);
+		if (oauthRadioBtn.selected) {
+			Alert.show(dropAPI.authorizationUrl);
+		}
 	};
 	dropAPI.addEventListener(DropboxEvent.REQUEST_TOKEN_RESULT, handler);
 	if (!dropAPI.hasEventListener(DropboxEvent.REQUEST_TOKEN_FAULT)) {
 		dropAPI.addEventListener(DropboxEvent.REQUEST_TOKEN_FAULT, faultHandler);
+	}
+}
+
+public function emailLogin():void
+{
+	dropAPI.token(eMailLabel.text, passwordLabel.text);
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.TOKEN_RESULT, handler);
+		var obj:Object = evt.resultObject;
+		accTokenKeyLabel.text = obj.token;
+		accTokenSecretLabel.text = obj.secret;
+		loginedAPIContainer.enabled = true;
+	};
+	dropAPI.addEventListener(DropboxEvent.TOKEN_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.TOKEN_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.TOKEN_FAULT, faultHandler);
 	}
 }
 
@@ -51,6 +70,7 @@ public function getAccessToken():void
 		var obj:Object = evt.resultObject;
 		accTokenKeyLabel.text = obj.key;
 		accTokenSecretLabel.text = obj.secret;
+		loginedAPIContainer.enabled = true;
 	};
 	dropAPI.addEventListener(DropboxEvent.ACCESS_TOKEN_RESULT, handler);
 	if (!dropAPI.hasEventListener(DropboxEvent.ACCESS_TOKEN_FAULT)) {
