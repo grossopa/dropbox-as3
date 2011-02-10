@@ -15,6 +15,7 @@ package org.hamster.dropbox
 		public static const REQUEST_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/request_token';
 		public static const ACCESS_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/access_token';
 		public static const AUTHORIZATION_URL:String = 'http://api.dropbox.com/0/oauth/authorize';
+		public static const TOKEN_URL:String = 'https://api.dropbox.com/0/token';
 		public static const SANDBOX:String = 'sandbox';
 		public static const DROPBOX:String = 'dropbox';
 		
@@ -54,6 +55,11 @@ package org.hamster.dropbox
 		public var authorizationUrl:String;
 		
 		/**
+		 * Token URL for getting access token by user's email and password. 
+		 */
+		public var tokenUrl:String;
+		
+		/**
 		 * Constructor
 		 *  
 		 * @param consumerKey
@@ -78,6 +84,7 @@ package org.hamster.dropbox
 			this.requestTokenUrl = REQUEST_TOKEN_URL;
 			this.accessTokenUrl = ACCESS_TOKEN_URL;
 			this.authorizationUrl = AUTHORIZATION_URL;
+			this.tokenUrl = TOKEN_URL;
 		}
 		
 		/**

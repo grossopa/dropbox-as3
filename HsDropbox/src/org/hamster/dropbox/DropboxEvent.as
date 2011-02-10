@@ -32,6 +32,8 @@ package org.hamster.dropbox
 		public static const METADATA_FAULT:String = 'DropboxEvent_MetadataFault';
 		public static const THUMBNAILS_RESULT:String = 'DropboxEvent_ThumbnailsResult';
 		public static const THUMBNAILS_FAULT:String = 'DropboxEvent_ThumbnailsFault';
+		public static const TOKEN_RESULT:String = 'DropboxEvent_TokenResult';
+		public static const TOKEN_FAULT:String = 'DropboxEvent_TokenFault';
 		
 		/**
 		 * related URLLoader Event. 

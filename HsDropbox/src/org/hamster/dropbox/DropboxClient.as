@@ -29,6 +29,8 @@ package org.hamster.dropbox
 	[Event(name="requestTokenFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="accessTokenResult",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="accessTokenFault",   type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="tokenResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="tokenFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
 	[Event(name="accountInfoResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="accountInfoFault",  type="org.hamster.dropbox.DropboxEvent")]
@@ -135,6 +137,72 @@ package org.hamster.dropbox
 			urlRequest.url = url;
 			return this.load(urlRequest, DropboxEvent.ACCESS_TOKEN_RESULT, 
 				DropboxEvent.ACCESS_TOKEN_FAULT, ACCESS_TOKEN);
+		}
+		
+		/**
+		 * The token call provides a consumer/secret key pair you can use to consistently access the user's account.
+		 * This is the preferred method of authentication over storing the username and password. Use the key pair 
+		 * as a signature with every subsequent call.
+		 * 
+		 * <p>The request must be signed using the application's developer and secret key token.
+		 * Request or access tokens are necessary. </p>
+		 * 
+		 * <p>DO NOT STORE THE USER'S PASSWORD!</p>
+		 * 
+		 * @param email
+		 * @param password
+		 * @return urlLoader
+		 * 
+		 */
+		public function token(email:String, password:String):URLLoader
+		{
+			var url:String = config.tokenUrl;
+			var params:Object = {
+				email : email,
+				password : password
+			}
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
+				config.consumerKey, config.consumerSecret, 
+				config.requestTokenKey, config.requestTokenSecret, URLRequestMethod.POST);
+			var urlRequest:URLRequest = new URLRequest();
+			urlRequest.requestHeaders = [urlReqHeader];
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.url = url;
+			urlRequest.data = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+			
+			var urlLoader:DropboxURLLoader = new DropboxURLLoader();
+			urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			urlLoader.eventResultType = DropboxEvent.TOKEN_RESULT;
+			urlLoader.eventFaultType = DropboxEvent.TOKEN_FAULT;
+			urlLoader.resultType = ACCESS_TOKEN;
+			
+			urlLoader.addEventListener(Event.COMPLETE, tokenCompleteHandler);
+			
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+			
+			urlLoader.load(urlRequest);
+			return urlLoader;
+		}
+		
+		/**
+		 * @private 
+		 */
+		private function tokenCompleteHandler(evt:Event):void
+		{
+			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
+			var resultObject:*;
+			try {
+				var accessToken:Object = JSON.decode(urlLoader.data);
+				this.config.accessTokenKey = accessToken.token;
+				this.config.accessTokenSecret = accessToken.secret;
+				resultObject = accessToken;
+			} catch (e:Error) {
+				this.dispatchDropboxEvent(DropboxEvent.TOKEN_FAULT, evt, e);
+				return;
+			}
+			
+			this.dispatchDropboxEvent(DropboxEvent.TOKEN_RESULT, evt, resultObject);
 		}
 		
 		/**
