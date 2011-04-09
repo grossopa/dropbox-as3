@@ -24,6 +24,19 @@ public function appCompleteHandler():void
 	dropAPI = new DropboxClient(config);
 }
 
+public function createAccount():void
+{
+	dropAPI.createAccount('yourtestemailhere@gmail.com', '123abc', 'a', 'b');
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.ACCOUNT_CREATE_RESULT, handler);
+	}
+	dropAPI.addEventListener(DropboxEvent.ACCOUNT_CREATE_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.ACCOUNT_CREATE_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.ACCOUNT_CREATE_FAULT, faultHandler);
+	}
+}
+
 public function getRequestToken():void
 {
 	dropAPI.requestToken();
