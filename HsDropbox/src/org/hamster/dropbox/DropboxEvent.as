@@ -34,6 +34,11 @@ package org.hamster.dropbox
 		public static const THUMBNAILS_FAULT:String = 'DropboxEvent_ThumbnailsFault';
 		public static const TOKEN_RESULT:String = 'DropboxEvent_TokenResult';
 		public static const TOKEN_FAULT:String = 'DropboxEvent_TokenFault';
+		/**
+		 * xperiments UPDATE 
+		 */		
+		public static const ACCOUNT_CREATE_RESULT:String = 'DropboxEvent_AccountCreateResult';
+		public static const ACCOUNT_CREATE_FAULT:String = 'DropboxEvent_AccountCreateFault';
 		
 		/**
 		 * related URLLoader Event. 

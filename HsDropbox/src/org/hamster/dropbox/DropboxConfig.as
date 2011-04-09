@@ -1,3 +1,4 @@
+
 package org.hamster.dropbox
 {
 	/**
@@ -18,6 +19,10 @@ package org.hamster.dropbox
 		public static const TOKEN_URL:String = 'https://api.dropbox.com/0/token';
 		public static const SANDBOX:String = 'sandbox';
 		public static const DROPBOX:String = 'dropbox';
+		/**
+		 * xperiments UPDATE 
+		 */
+		public static const ACCOUNT_CREATE_URL:String = 'http://api.dropbox.com/0/account';		
 		
 		public var consumerKey:String;
 		public var consumerSecret:String;
@@ -58,6 +63,11 @@ package org.hamster.dropbox
 		 * Token URL for getting access token by user's email and password. 
 		 */
 		public var tokenUrl:String;
+		/**
+		 * xperiments UPDATE 
+		 * Account Create URL for getting for registering a new account by user's name, first name, email password. 
+		 */
+		public var accountCreateUrl:String;	
 		
 		/**
 		 * Constructor
@@ -85,6 +95,10 @@ package org.hamster.dropbox
 			this.accessTokenUrl = ACCESS_TOKEN_URL;
 			this.authorizationUrl = AUTHORIZATION_URL;
 			this.tokenUrl = TOKEN_URL;
+			/**
+			 * xperiments UPDATE 
+			 */			
+			this.accountCreateUrl = ACCOUNT_CREATE_URL;
 		}
 		
 		/**

@@ -25,6 +25,9 @@ package org.hamster.dropbox
 	
 	import ru.inspirit.net.MultipartURLLoader;
 
+	[Event(name="accountCreateResult",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="accountCreateFault",   type="org.hamster.dropbox.DropboxEvent")]
+	
 	[Event(name="requestTokenResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="requestTokenFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="accessTokenResult",  type="org.hamster.dropbox.DropboxEvent")]
@@ -81,6 +84,11 @@ package org.hamster.dropbox
 		protected static const DROPBOX_FILE:String = 'dropbox_file';
 		
 		/**
+		 * xperiments UPDATE 
+		 */
+		protected static const ACCOUNT_CREATE:String = 'account_create';
+		
+		/**
 		 * @private
 		 */
 		private var _config:DropboxConfig;
@@ -101,6 +109,50 @@ package org.hamster.dropbox
 		public function DropboxClient(config:DropboxConfig)
 		{
 			_config = config;
+		}
+		
+		/**
+		 * xperiments UPDATE 
+		 */
+		public function createAccount( email:String, password:String, first_name:String, last_name:String ):URLLoader
+		{
+			var url:String = config.accountCreateUrl;
+			var params:Object = {
+				email:email,
+				first_name:first_name,
+				last_name: last_name,
+				password:password 
+			}
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
+				config.consumerKey, config.consumerSecret, 
+				config.requestTokenKey, config.requestTokenSecret, URLRequestMethod.POST);
+			var urlRequest:URLRequest = new URLRequest();
+			urlRequest.requestHeaders = [urlReqHeader];
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.url = url;
+			urlRequest.data = 'email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&first_name=' + encodeURIComponent(first_name) + '&last_name=' + encodeURIComponent(last_name);
+			
+			var urlLoader:DropboxURLLoader = new DropboxURLLoader();
+			urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			urlLoader.eventResultType = DropboxEvent.ACCOUNT_CREATE_RESULT;
+			urlLoader.eventFaultType = DropboxEvent.ACCOUNT_CREATE_FAULT;
+			urlLoader.resultType = ACCOUNT_CREATE;
+			
+			urlLoader.addEventListener(Event.COMPLETE, createAccountCompleteHandler);
+			
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+			
+			urlLoader.load(urlRequest);
+			return urlLoader;			
+		}	
+		/**
+		 * xperiments UPDATE 
+		 */		
+		private function createAccountCompleteHandler(evt:Event):void
+		{
+			var resultObject:Object ={ status:'ok' };
+			this.dispatchDropboxEvent(DropboxEvent.ACCOUNT_CREATE_RESULT, evt, resultObject);
 		}
 		
 		/**
