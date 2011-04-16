@@ -200,7 +200,7 @@ public function deleteFile():void
 
 public function getFile():void
 {
-	dropAPI.getFile(testFolder1 + '/copied_' + testFile);
+	dropAPI.getFile('VCE_090522_A003.MP3');
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.GET_FILE_RESULT, handler);
