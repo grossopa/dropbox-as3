@@ -15,7 +15,8 @@ package org.hamster.dropbox
 		public static const PORT:int = 80;
 		public static const REQUEST_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/request_token';
 		public static const ACCESS_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/access_token';
-		public static const AUTHORIZATION_URL:String = 'http://api.dropbox.com/0/oauth/authorize';
+		//public static const AUTHORIZATION_URL:String = 'http://api.dropbox.com/0/oauth/authorize';
+		public static const AUTHORIZATION_URL:String = 'https://www.dropbox.com/0/oauth/authorize';
 		public static const TOKEN_URL:String = 'https://api.dropbox.com/0/token';
 		public static const SANDBOX:String = 'sandbox';
 		public static const DROPBOX:String = 'dropbox';
