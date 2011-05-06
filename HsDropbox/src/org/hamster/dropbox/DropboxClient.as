@@ -431,7 +431,7 @@ package org.hamster.dropbox
 								root:String=DropboxConfig.DROPBOX):URLLoader
 		{
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' + filePath, null);
+				config.contentServer, "/files/" + root + '/' + encodeURIComponent(filePath), null);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -450,7 +450,7 @@ package org.hamster.dropbox
 								data:ByteArray, 
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + filePath);
+			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + encodeURIComponent(filePath));
 			var params:Object = { 
 				"file" : fileName
 			};
