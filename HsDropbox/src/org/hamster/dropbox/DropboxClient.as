@@ -393,7 +393,7 @@ package org.hamster.dropbox
 			};
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, "/metadata/" + root + '/' + path, params);
+				config.server, "/metadata/" + root + '/' + buildFilePath(path), params);
 			return this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
 		}
@@ -414,7 +414,7 @@ package org.hamster.dropbox
 				"size" : size
 			};
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
+				config.contentServer, "/thumbnails/" + root + '/' + buildFilePath(pathToPhoto), params);
 			return this.load(urlRequest, DropboxEvent.THUMBNAILS_RESULT, 
 				DropboxEvent.THUMBNAILS_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -431,11 +431,11 @@ package org.hamster.dropbox
 								root:String=DropboxConfig.DROPBOX):URLLoader
 		{
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' + encodeURIComponent(filePath), null);
+				config.contentServer, "/files/" + root + '/' +  buildFilePath(filePath), null);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
-		
+		 
 		/**
 		 * Put a file to server.
 		 *  
@@ -450,7 +450,7 @@ package org.hamster.dropbox
 								data:ByteArray, 
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + encodeURIComponent(filePath));
+			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + buildFilePath(filePath));
 			var params:Object = { 
 				"file" : fileName
 			};
@@ -666,6 +666,22 @@ package org.hamster.dropbox
 				protocol += "://";
 			}
 			return protocol + host + portString + '/' + config.apiVersion + target; 
+		}
+		
+		/**
+		 * encode file path.
+		 *  
+		 * @param filePath
+		 * @return encoded file path
+		 * 
+		 */
+		private static function buildFilePath(filePath:String):String
+		{
+			var filePaths:Array = filePath.split('/');
+			for (var i:int = 0; i < filePaths.length; i++) {
+				filePaths[i] = encodeURIComponent(filePaths[i]);
+			}
+			return filePaths.join('/');
 		}
 	}
 }
