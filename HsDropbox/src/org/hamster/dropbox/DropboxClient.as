@@ -121,7 +121,8 @@ package org.hamster.dropbox
 				email:email,
 				first_name:first_name,
 				last_name: last_name,
-				password:password 
+				password:password,
+				locale: config.locale
 			}
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
 				config.consumerKey, config.consumerSecret, 
@@ -425,13 +426,20 @@ package org.hamster.dropbox
 		 * 
 		 * @param filePath
 		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * @rev file revision added in v1
 		 * @return urlLoader
 		 */
-		public function getFile(filePath:String, 
+		public function getFile(filePath:String, rev:String = "",
 								root:String=DropboxConfig.DROPBOX):URLLoader
 		{
+			var params:Object = null;
+			if (rev != "") {
+				params = {
+					rev : rev
+				}
+			}
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' +  buildFilePath(filePath), null);
+				config.contentServer, "/files/" + root + '/' +  buildFilePath(filePath), params);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -665,7 +673,7 @@ package org.hamster.dropbox
 			} else {
 				protocol += "://";
 			}
-			return protocol + host + portString + '/' + config.apiVersion + target; 
+			return protocol + host + portString + (target == "" ? "" : '/' + config.apiVersion + target); 
 		}
 		
 		/**

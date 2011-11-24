@@ -9,21 +9,24 @@ package org.hamster.dropbox
 	 */
 	public class DropboxConfig
 	{
-		public static const API_VERSION:int = 0;
-		public static const SERVER:String = 'api.dropbox.com';
-		public static const CONTENT_SERVER:String = 'api-content.dropbox.com';
+		public static const API_VERSION:int = 1;
+		public static const SERVER:String = 'https://api.dropbox.com';
+		public static const CONTENT_SERVER:String = 'https://api-content.dropbox.com';
 		public static const PORT:int = 80;
-		public static const REQUEST_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/request_token';
-		public static const ACCESS_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/access_token';
-		//public static const AUTHORIZATION_URL:String = 'http://api.dropbox.com/0/oauth/authorize';
-		public static const AUTHORIZATION_URL:String = 'https://www.dropbox.com/0/oauth/authorize';
-		public static const TOKEN_URL:String = 'https://api.dropbox.com/0/token';
+//		public static const REQUEST_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/request_token';
+//		public static const ACCESS_TOKEN_URL:String = 'http://api.dropbox.com/0/oauth/access_token';
+//		public static const AUTHORIZATION_URL:String = 'https://www.dropbox.com/0/oauth/authorize';
+//		public static const TOKEN_URL:String = 'https://api.dropbox.com/0/token';
+		public static const REQUEST_TOKEN_URL:String = 'https://api.dropbox.com/1/oauth/request_token';
+		public static const ACCESS_TOKEN_URL:String = 'https://api.dropbox.com/1/oauth/access_token';
+		public static const AUTHORIZATION_URL:String = 'https://www.dropbox.com/1/oauth/authorize';
+		public static const TOKEN_URL:String = 'https://api.dropbox.com/1/token';
 		public static const SANDBOX:String = 'sandbox';
 		public static const DROPBOX:String = 'dropbox';
 		/**
 		 * xperiments UPDATE 
 		 */
-		public static const ACCOUNT_CREATE_URL:String = 'http://api.dropbox.com/0/account';		
+		public static const ACCOUNT_CREATE_URL:String = 'https://api.dropbox.com/1/account';		
 		
 		public var consumerKey:String;
 		public var consumerSecret:String;
@@ -71,6 +74,12 @@ package org.hamster.dropbox
 		public var accountCreateUrl:String;	
 		
 		/**
+		 * * Added In Version 1
+		 * locale for response language
+		 */
+		public var locale:String = "en_US";
+		
+		/**
 		 * Constructor
 		 *  
 		 * @param consumerKey
@@ -83,7 +92,7 @@ package org.hamster.dropbox
 		public function DropboxConfig(
 			consumerKey:String, consumerSecret:String,
 			requestTokenKey:String = "", requestTokenSecret:String = "",
-			accessTokenKey:String = "", accessTokenSecret:String = "")
+			accessTokenKey:String = "", accessTokenSecret:String = "", locale:String = "en_US")
 		{
 			this.setConsumer(consumerKey, consumerSecret);
 			this.setRequestToken(requestTokenKey, requestTokenSecret);
@@ -100,6 +109,8 @@ package org.hamster.dropbox
 			 * xperiments UPDATE 
 			 */			
 			this.accountCreateUrl = ACCOUNT_CREATE_URL;
+			
+			this.locale = locale;
 		}
 		
 		/**
