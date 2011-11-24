@@ -20,8 +20,12 @@ public function appCompleteHandler():void
 	var config:DropboxConfig = new DropboxConfig('', '');
 	//config.setConsumer();
 //	config.setRequestToken('', '');
-	//config.setAccessToken('', '');
+//	config.setAccessToken('', '');
 	dropAPI = new DropboxClient(config);
+	
+	if (config.accessTokenKey && config.accessTokenSecret) {
+		loginedAPIContainer.enabled = true;
+	}
 }
 
 public function createAccount():void
@@ -58,7 +62,7 @@ public function getRequestToken():void
 }
 
 public function emailLogin():void
-{
+{ 
 	dropAPI.token(eMailLabel.text, passwordLabel.text);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
@@ -116,7 +120,7 @@ public function uploadFile():void
 	{
 		fr.removeEventListener(Event.COMPLETE, loadCompHandler);
 		testFile = fr.name;
-		dropAPI.putFile(testFolder1, fr.name, fr.data);
+		dropAPI.putFile('friend icons', fr.name, fr.data);
 		var handler:Function = function (evt:DropboxEvent):void
 		{
 			dropAPI.removeEventListener(DropboxEvent.PUT_FILE_RESULT, handler);
@@ -171,7 +175,7 @@ public function createFolder():void
 
 public function moveFile():void
 {
-	dropAPI.fileMove(testFolder1 + '/' + testFile, testFolder1 + '/moved_' + testFile);
+	dropAPI.fileMove('friend icons/15414659_265289702  aa.jpg', 'friend icons/15414659_265289702  bb.jpg');
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.FILE_MOVE_RESULT, handler);
@@ -200,7 +204,7 @@ public function deleteFile():void
 
 public function getFile():void
 {
-	dropAPI.getFile('VCE_090522_A003.MP3');
+	dropAPI.getFile('friend icons/15414659_265289702  aa.jpg', "0");
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.GET_FILE_RESULT, handler);
@@ -214,7 +218,7 @@ public function getFile():void
 
 public function metadata():void
 {
-	dropAPI.metadata('12744358208051' + '', 1000, "", true);
+	dropAPI.metadata('friend icons/15414659_265289702  aa.jpg', 1000, "", true);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.METADATA_RESULT, handler);
@@ -228,7 +232,7 @@ public function metadata():void
 
 public function thumbnails():void
 {
-	dropAPI.thumbnails('test.jpg', "");
+	dropAPI.thumbnails('friend icons/15414659_265289702  aa.jpg', "");
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.THUMBNAILS_RESULT, handler);
@@ -242,5 +246,6 @@ public function thumbnails():void
 
 private function faultHandler(evt:Event):void
 {
-	Alert.show((evt as Object).resultObject);
+	trace ((evt as Object).resultObject.toString());
+	Alert.show((evt as Object).resultObject.toString());
 }
