@@ -39,6 +39,19 @@ package org.hamster.dropbox
 		 */		
 		public static const ACCOUNT_CREATE_RESULT:String = 'DropboxEvent_AccountCreateResult';
 		public static const ACCOUNT_CREATE_FAULT:String = 'DropboxEvent_AccountCreateFault';
+		/**
+		 * added in v1
+		 */
+		public static const REVISION_RESULT:String 	= "DropboxEvent_RevisionResult";
+		public static const REVISION_FAULT:String 	= "DropboxEvent_RevisionFault";
+		public static const RESTORE_RESULT:String 	= "DropboxEvent_RestoreResult";
+		public static const RESTORE_FAULT:String 	= "DropboxEvent_RestoreFault";
+		public static const SEARCH_RESULT:String	= 'DropboxEvent_SearchResult';
+		public static const SEARCH_FAULT:String		= 'DropboxEvent_SearchFault';
+		public static const SHARES_RESULT:String	= 'DropboxEvent_SharesResult';
+		public static const SHARES_FAULT:String		= 'DropboxEvent_SharesFault';
+		public static const MEDIA_RESULT:String		= 'DropboxEvent_MediaResult';
+		public static const MEDIA_FAULT:String		= 'DropboxEvent_MediaFault';
 		
 		/**
 		 * related URLLoader Event. 

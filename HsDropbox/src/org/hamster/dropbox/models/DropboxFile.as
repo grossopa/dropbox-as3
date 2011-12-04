@@ -16,6 +16,10 @@ package org.hamster.dropbox.models
 		public var mimeType:String;
 		public var size:String;
 		public var path:String;
+		// added in version 1
+		public var rev:String;
+		public var revision:String;
+		public var isDeleted:Boolean;
 		
 		public var hash:String;
 		public var contents:Array;
@@ -42,6 +46,9 @@ package org.hamster.dropbox.models
 			this.mimeType = result['mime_type'];
 			this.size = result['size'];
 			this.path = result['path'];
+			this.rev = result['rev'];
+			this.revision = result['revision'];
+			this.isDeleted = result['is_deleted'];
 			
 			this.hash = result['hash'];
 			
@@ -57,6 +64,9 @@ package org.hamster.dropbox.models
 		{
 			var s:String = "DropboxFile [bytes=" + bytes
 			s	+=  ", hash=" + (hash == null ? "null" : hash) 
+			s	+=  ", rev=" + (rev == null ? "null" : rev) 
+			s	+=  ", revision=" + (revision == null ? "null" : revision) 
+			s	+=  ", isDeleted=" + isDeleted
 			s	+=  ", icon=" + (icon == null ? "null" : icon)
 			s	+=  ", isDir=" + isDir == null
 			s	+=  ", mimeType=" + (mimeType == null ? "null" : mimeType)

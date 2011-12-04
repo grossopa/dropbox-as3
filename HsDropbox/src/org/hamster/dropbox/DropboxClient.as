@@ -21,6 +21,7 @@ package org.hamster.dropbox
 	
 	import org.hamster.dropbox.models.AccountInfo;
 	import org.hamster.dropbox.models.DropboxFile;
+	import org.hamster.dropbox.models.SharesInfo;
 	import org.hamster.dropbox.utils.OAuthHelper;
 	
 	import ru.inspirit.net.MultipartURLLoader;
@@ -51,6 +52,16 @@ package org.hamster.dropbox
 	[Event(name="getFileFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="metadataResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="metadataFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="revisionResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="revisionFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="restoreResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="restoreFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="searchResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="searchFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="sharesResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="sharesFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="mediaResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="mediaFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
 	/**
 	 * Dropbox client class, in order to use, you should build an instance of
@@ -82,6 +93,8 @@ package org.hamster.dropbox
 		protected static const ACCESS_TOKEN:String = 'access_token';
 		protected static const ACCOUNT_INFO:String = 'account_info';
 		protected static const DROPBOX_FILE:String = 'dropbox_file';
+		protected static const DROPBOX_FILE_LIST:String = 'dropbox_file_list';
+		protected static const SHARES_INFO:String = 'shares_info';
 		
 		/**
 		 * xperiments UPDATE 
@@ -381,11 +394,19 @@ package org.hamster.dropbox
 		 * @param hash pass a hash value to perform better performance
 		 * @param list if query a directory, true to show sub list.
 		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * @param include_deleted optional, added in v1
+		 * @param rev optional, added in v1
+		 * @param locale optional, added in v1
 		 * @return urlLoader
 		 */
 		public function metadata(path:String, 
-			fileLimit:int, hash:String, list:Boolean,
-			root:String = DropboxConfig.DROPBOX):URLLoader
+								 fileLimit:int, 
+								 hash:String, 
+								 list:Boolean,
+								 include_deleted:Boolean = false,
+								 rev:String = "",
+								 locale:String = "",
+								 root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = {
 				"file_limit" : fileLimit,
@@ -393,8 +414,14 @@ package org.hamster.dropbox
 				"list": list
 			};
 			
+			// added in v1
+			if (include_deleted == true)
+				buildOptionalParameters(params, 'include_deleted', include_deleted);
+			buildOptionalParameters(params, 'rev', rev);
+			buildOptionalParameters(params, 'locale', locale);
+			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, "/metadata/" + root + '/' + buildFilePath(path), params);
+				config.server, '/metadata/' + root + '/' + buildFilePath(path), params);
 			return this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
 		}
@@ -451,17 +478,29 @@ package org.hamster.dropbox
 		 * @param fileName
 		 * @param data
 		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * @param locale optional added in v1
+		 * @param overwrite optional added in v1
+		 * @param parent_rev optional added in v1
 		 * @return multipartURLLoader
 		 */
 		public function putFile(filePath:String, 
 								fileName:String, 
 								data:ByteArray, 
+								locale:String = "",
+								overwrite:Boolean = true,
+								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
 			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + buildFilePath(filePath));
 			var params:Object = { 
 				"file" : fileName
 			};
+			
+			//added in version 1
+			buildOptionalParameters(params, 'locale', locale);
+			params.overwrite = overwrite.toString();
+			buildOptionalParameters(params, 'parent_rev', parent_rev);
+			
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
 				config.consumerKey, config.consumerSecret, 
 				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.POST);
@@ -473,6 +512,117 @@ package org.hamster.dropbox
 			m.addEventListener(SecurityErrorEvent.SECURITY_ERROR, uploadSecurityErrorHandler);
 			m.load(url);
 			return m;
+		}
+		
+		/**
+		 * added in v1, get revisions of a file.
+		 * https://api.dropbox.com/1/revisions/<root>/<path>
+		 * 
+		 * @param filePathWithName
+		 * @root optional, default is dropbox.  
+		 */
+		public function revisions(filePathWithName:String,
+								  root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/revisions/' + root + '/' +  buildFilePath(filePathWithName), null);
+			return this.load(urlRequest, DropboxEvent.REVISION_RESULT, 
+				DropboxEvent.REVISION_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
+		}
+		
+		/**
+		 * added in v1, restore file by rev. 
+		 * https://api.dropbox.com/1/restore/<root>/<path>
+		 * 
+		 * @param filePathWithName
+		 * @param rev revision to restore
+		 * @locale optional
+		 * @root optional, default is dropbox.
+		 * 
+		 */
+		public function restore(filePathWithName:String,
+								rev:String,
+								locale:String="",
+								root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var params:Object = {
+				rev : rev
+			};
+			
+			buildOptionalParameters(params, 'locale', locale);
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/restore/' + root + '/' +  buildFilePath(filePathWithName), params, URLRequestMethod.POST);
+			return this.load(urlRequest, DropboxEvent.RESTORE_RESULT, 
+				DropboxEvent.RESTORE_FAULT, DROPBOX_FILE, URLLoaderDataFormat.TEXT);			
+		}
+		
+		/**
+		 * added in v1, search by query.
+		 * https://api.dropbox.com/1/search/<root>/<path>
+		 * 
+		 * @param filePathWithName
+		 * @param rev revision to restore
+		 * @locale optional
+		 * @root optional, default is dropbox.
+		 * 
+		 */
+		public function search(filePath:String, 
+							   query:String,
+							   file_limit:int = 1000,
+							   include_deleted:Boolean = false,
+							   root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var params:Object = {
+				query : query
+			};
+			
+			buildOptionalParameters(params, 'file_limit', file_limit);
+			buildOptionalParameters(params, 'include_deleted', include_deleted);
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/search/' + root + '/' +  buildFilePath(filePath), params, URLRequestMethod.POST);
+			return this.load(urlRequest, DropboxEvent.SEARCH_RESULT, 
+				DropboxEvent.SEARCH_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
+		}
+		
+		/**
+		 * 
+		 * https://api.dropbox.com/1/shares/<root>/<path>
+		 * 
+		 * @param filePathWithName
+		 * @root optional, default is dropbox.
+		 */
+		public function shares(filePathWithName:String,
+							   root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/shares/' + root + '/' +  buildFilePath(filePathWithName), null);
+			return this.load(urlRequest, DropboxEvent.SHARES_RESULT, 
+				DropboxEvent.SHARES_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
+		}
+		
+		/**
+		 * 
+		 * https://api.dropbox.com/1/media/<root>/<path>
+		 * 
+		 * @param filePathWithName
+		 * @root optional, default is dropbox.
+		 */
+		public function media(filePathWithName:String,
+							  locale:String = "",
+							  root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var params:Object;
+			if (locale != null && locale != "") {
+				params = new Object();
+				buildOptionalParameters(params, 'locale', locale);
+			}
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/media/' + root + '/' +  buildFilePath(filePathWithName), params, URLRequestMethod.POST);
+			return this.load(urlRequest, DropboxEvent.MEDIA_RESULT, 
+				DropboxEvent.MEDIA_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
 		
 		/**
@@ -565,6 +715,19 @@ package org.hamster.dropbox
 					var dropboxFile:DropboxFile = new DropboxFile();
 					dropboxFile.decode(JSON.decode(urlLoader.data));
 					resultObject = dropboxFile;
+				} else if (urlLoader.resultType == DROPBOX_FILE_LIST) {
+					var array:Array = new Array();
+					var resultArray:* = JSON.decode(urlLoader.data);
+					for each (var ro:Object in resultArray) {
+						var df:DropboxFile = new DropboxFile();
+						df.decode(ro);
+						array.push(df);
+					}
+					resultObject = array;
+				} else if (urlLoader.resultType == SHARES_INFO) {
+					var sharesInfo:SharesInfo = new SharesInfo();
+					sharesInfo.decode(JSON.decode(urlLoader.data));
+					resultObject = sharesInfo;
 				} else {
 					resultObject = urlLoader.data;
 				}
@@ -685,11 +848,21 @@ package org.hamster.dropbox
 		 */
 		private static function buildFilePath(filePath:String):String
 		{
+			if (filePath.indexOf('/') < 0) {
+				return filePath;
+			}
 			var filePaths:Array = filePath.split('/');
 			for (var i:int = 0; i < filePaths.length; i++) {
 				filePaths[i] = encodeURIComponent(filePaths[i]);
 			}
 			return filePaths.join('/');
+		}
+		
+		private static function buildOptionalParameters(paramTarget:Object, paramName:String, paramValue:*):void
+		{
+			if (paramName != null && paramName != "" && paramValue != null && paramValue != "") {
+				paramTarget[paramName] = paramValue.toString();
+			}
 		}
 	}
 }
@@ -711,6 +884,7 @@ internal class DropboxURLLoader extends URLLoader
 	 * REQUEST_TOKEN & ACCESS_TOKEN : set to DropboxConfig when type is requestToken & accessToken.
 	 * ACCOUNT_INFO : return an AccountInfo object
 	 * DROPBOX_FILE : return an DropboxFile object
+	 * DROPBOX_FILE_LIST : return an array of DropboxFile object
 	 * others : return response string.
 	 */
 	public var resultType:String;

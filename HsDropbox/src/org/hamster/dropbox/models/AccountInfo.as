@@ -8,12 +8,16 @@ package org.hamster.dropbox.models
 	 */
 	public class AccountInfo extends DropboxModelSupport
 	{
-		[Bindable] public var uid:int;
-		[Bindable] public var country:String;
-		[Bindable] public var displayName:String;
-		[Bindable] public var quotaInfo_shared:Number;
-		[Bindable] public var quotaInfo_quota:Number;
-		[Bindable] public var quotaInfo_normal:Number;
+		public var uid:int;
+		public var country:String;
+		public var displayName:String;
+		public var quotaInfo_shared:Number;
+		public var quotaInfo_quota:Number;
+		public var quotaInfo_normal:Number;
+		
+		// added in version 1
+		public var referral_link:String;
+		public var email:String;
 		
 		public function AccountInfo()
 		{
@@ -31,12 +35,17 @@ package org.hamster.dropbox.models
 			this.quotaInfo_normal = quotaInfo['normal'];
 			this.quotaInfo_quota = quotaInfo['quota'];
 			this.quotaInfo_shared = quotaInfo['shared'];
+			this.referral_link = result['referral_link'];
+			this.email = result['email'];
 		}
 		
 		override public function toString():String 
 		{
-			return "AccountInfo [country=" + country + ", displayName="
-				+ displayName + ", quotaInfo_normal=" + quotaInfo_normal
+			return "AccountInfo [referral_link=" + referral_link 
+				+ ", email=" + email
+				+ ", country=" + country
+				+ ", displayName=" + displayName 
+				+ ", quotaInfo_normal=" + quotaInfo_normal
 				+ ", quotaInfo_quota=" + quotaInfo_quota
 				+ ", quotaInfo_shared=" + quotaInfo_shared + ", uid=" + uid
 				+ "]";
