@@ -1,6 +1,3 @@
-/**
- * Issue 4: add fail information to DropboxEvent.resultObject;
- */
 package org.hamster.dropbox
 {
 	import com.adobe.serialization.json.JSON;
@@ -67,23 +64,24 @@ package org.hamster.dropbox
 	 * Dropbox client class, in order to use, you should build an instance of
 	 * it and put a DropboxConfig instance into it.
 	 * 
-	 * OAuth workflow:
-	 * 1. Ensure that the consumer key/secret pair is set;
-	 * 2. Call requestToken() function, register REQUEST_TOKEN_RESULT listener
-	 *    and call authorizationUrl() to get the authorization URL;
-	 * 3. Let user open the URL and allow application to access;
-	 * 4. Call accessToken() function to get access token key/secret pair;
-	 * 5. Currently you have 3 key/secret pairs, consumer, requestToken and accessToken,
-	 *    store all properties of DropboxConig to somewhere.
+	 * <p><b>OAuth workflow:</b></p>
+	 * <li>1. Ensure that the consumer key/secret pair has been set;</li>
+	 * <li>2. Call requestToken() function, register REQUEST_TOKEN_RESULT listener
+	 *    and call authorizationUrl() to get the authorization URL;</li>
+	 * <li>3. Let user open the URL in browser and then allow application to access;</li>
+	 * <li>4. Call accessToken() function to get access token key/secret pair;</li>
+	 * <li>5. Currently you have 3 key/secret pairs, consumer, requestToken and accessToken,
+	 *    store all properties (or at least consumer and accessToken) 
+	 *    of DropboxConig to somewhere.</li>
 	 * 
-	 * API access:
-	 * 1. Ensure all tokens are set to DropboxConfig;
-	 * 2. Register listener before you call any API;
-	 * 3. Unregister listener if the listener is no longer necessary.
+	 * <p><b>API access:</b></p>
+	 * <li>1. Ensure all tokens are set to DropboxConfig;</li>
+	 * <li>2. Register listener before you call any API;</li>
+	 * <li>3. Unregister listener if the listener is no longer necessary.</li>
 	 *  
-	 * Each API function will return a URLLoader instance which load(urlReqeust:URLRequest)
+	 * <p>Each API function will return a URLLoader instance which load(urlReqeust:URLRequest)
 	 * has been called, you can register other listeners if you want. After the request is
-	 * done, the corresponding event will be dispatched from this class.
+	 * done, the corresponding event will be dispatched from this class.</li>
 	 * 
 	 * @author yinzeshuo
 	 */
@@ -286,8 +284,12 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * The account/info API call to Dropbox for getting info about an account attached to the access token.
-		 * Return status and account information in JSON format.
+		 * Retrieves information about the user's account.
+		 * 
+		 * <p>https://api.dropbox.com/1/account/info</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: User account information.</p>
 		 * 
 		 * @return urlLoader
 		 */
@@ -300,8 +302,12 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Copy a file from one path to another, with root being either "sandbox" or "dropbox".
-		 * return copied file metadata information in JSON format.
+		 * Copies a file or folder to a new location.
+		 * 
+		 * <p>https://api.dropbox.com/1/fileops/copy</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: Metadata for the copy of the file or folder.</p>
 		 * 
 		 * @param fromPath
 		 * @param toPath
@@ -323,8 +329,12 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Create a folder at the given path. Return created folder 
-		 * metadata information in JSON format.
+		 * Creates a folder.
+		 * 
+		 * <p>https://api.dropbox.com/1/fileops/create_folder</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: Metadata for the new folder.</p>
 		 * 
 		 * @param path
 		 * @param root, optional, default is "dropbox" 2011/01/22
@@ -344,7 +354,12 @@ package org.hamster.dropbox
 		}
 		
 		/** 
-		 * Delete a file.
+		 * Deletes a file or folder.
+		 * 
+		 * <p>https://api.dropbox.com/1/fileops/delete</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: Metadata for the deleted file or folder.</p>
 		 * 
 		 * @param path full file path
 		 * @param root, optional, default is "dropbox" 2011/01/22
@@ -365,7 +380,12 @@ package org.hamster.dropbox
 		}
 		
 		/** 
-		 * Move a file.
+		 * Moves a file or folder to a new location.
+		 * 
+		 * <p>https://api.dropbox.com/1/fileops/move</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: Metadata for the moved file or folder.</p>
 		 * 
 		 * @param fromPath
 		 * @param toPath
@@ -387,7 +407,14 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Get metadata about directories and files, such as file listings and such.
+		 * Retrieves file and folder metadata.
+		 * 
+		 * <p>https://api.dropbox.com/1/metadata/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: The metadata for the file or folder at the given &lt;path&gt;. 
+		 * If &lt;path&gt; represents a folder and the list parameter is true, 
+		 * the metadata will also include a listing of metadata for the folder's contents.</p>
 		 * 
 		 * @param path
 		 * @param fileLimit
@@ -427,8 +454,12 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Get thumbnails of a photo, dispatch a fault event if no thumbnails available 
-		 * or photo doesn't exist.
+		 * Gets a thumbnail for an image. Note that this call goes to the api-content server.
+		 * 
+		 * <p>https://api-content.dropbox.com/1/thumbnails/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: A thumbnail of the specified image's contents.</p>
 		 * 
 		 * @param pathToPhoto
 		 * @param size optional, small|medium|large, medium as default
@@ -448,10 +479,15 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Get a file from the content server, returning the raw Apache HTTP Components response object
-		 * so you can stream it or work with it how you need. 
+		 * Downloads a file. Note that this call goes to the api-content server.
+		 * 
+		 * <p>https://api-content.dropbox.com/1/files/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: The specified file's contents at the requested revision.</p>
 		 * 
 		 * @param filePath
+		 * @param rev
 		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @rev file revision added in v1
 		 * @return urlLoader
@@ -472,7 +508,12 @@ package org.hamster.dropbox
 		}
 		 
 		/**
-		 * Put a file to server.
+		 * Uploads a file. Note that this call goes to the api-content server.
+		 * 
+		 * <p>https://api-content.dropbox.com/1/files/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: The metadata for the uploaded file.</p>
 		 *  
 		 * @param filePath
 		 * @param fileName
@@ -515,11 +556,16 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * added in v1, get revisions of a file.
-		 * https://api.dropbox.com/1/revisions/<root>/<path>
+		 * Obtains metadata for the previous revisions of a file.
+		 * 
+		 * <p>https://api.dropbox.com/1/revisions/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: A list of all revisions formatted just like file metadata.</p>
 		 * 
 		 * @param filePathWithName
-		 * @root optional, default is dropbox.  
+		 * @param root optional, default is dropbox.  
+		 * @return urlLoader
 		 */
 		public function revisions(filePathWithName:String,
 								  root:String = DropboxConfig.DROPBOX):URLLoader
@@ -531,14 +577,21 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * added in v1, restore file by rev. 
-		 * https://api.dropbox.com/1/restore/<root>/<path>
+		 * Restores a file path to a previous revision. 
+		 * Unlike downloading a file at a given revision and 
+		 * then re-uploading it, this call is atomic. 
+		 * It also saves a bunch of bandwidth.
+		 * 
+		 * <p>https://api.dropbox.com/1/restore/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: A list of all revisions formatted just like file metadata.</p>
 		 * 
 		 * @param filePathWithName
 		 * @param rev revision to restore
-		 * @locale optional
-		 * @root optional, default is dropbox.
-		 * 
+		 * @param locale optional
+		 * @param root optional, default is dropbox.
+		 * @return urlLoader
 		 */
 		public function restore(filePathWithName:String,
 								rev:String,
@@ -558,13 +611,20 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * added in v1, search by query.
-		 * https://api.dropbox.com/1/search/<root>/<path>
+		 * Returns metadata for all files and folders that match the 
+		 * search query. Searches are limited to the folder path and 
+		 * its sub-folder hierarchy provided in the call.
+		 * 
+		 * <p>https://api.dropbox.com/1/search/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 1</p>
+		 * <p>methods: GET, POST</p>
+		 * <p>results: List of metadata entries for any matching files and folders.</p>
 		 * 
 		 * @param filePathWithName
 		 * @param rev revision to restore
-		 * @locale optional
-		 * @root optional, default is dropbox.
+		 * @param locale optional
+		 * @param root optional, default is dropbox.
+		 * @return urlLoader
 		 * 
 		 */
 		public function search(filePath:String, 
@@ -587,11 +647,20 @@ package org.hamster.dropbox
 		}
 		
 		/**
+		 * Creates and returns a shareable link to files or folders. 
+		 * Note: Links created by the /shares API call expire after thirty days.
 		 * 
-		 * https://api.dropbox.com/1/shares/<root>/<path>
+		 * <p>https://api.dropbox.com/1/shares/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 0,1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: A shareable link to the file or folder. 
+		 * The link can be used publicly and directs to a preview page 
+		 * of the file. Also returns the link's expiration date 
+		 * in Dropbox's usual date format.</p>
 		 * 
 		 * @param filePathWithName
-		 * @root optional, default is dropbox.
+		 * @param root optional, default is dropbox.
+		 * @return urlLoader
 		 */
 		public function shares(filePathWithName:String,
 							   root:String = DropboxConfig.DROPBOX):URLLoader
@@ -603,11 +672,20 @@ package org.hamster.dropbox
 		}
 		
 		/**
+		 * Returns a link directly to a file. Similar to /shares. 
+		 * The difference is that this bypasses the Dropbox webserver,
+		 * used to provide a preview of the file, so that you can 
+		 * effectively stream the contents of your media.
 		 * 
-		 * https://api.dropbox.com/1/media/<root>/<path>
+		 * <p>https://api.dropbox.com/1/media/&lt;root&gt;/&lt;path&gt;</p>
+		 * <p>version: 1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: A url that serves the media directly. Also returns 
+		 * the link's expiration date in Dropbox's usual date format.</p>
 		 * 
 		 * @param filePathWithName
-		 * @root optional, default is dropbox.
+		 * @param root optional, default is dropbox.
+		 * @return urlLoader
 		 */
 		public function media(filePathWithName:String,
 							  locale:String = "",
