@@ -20,7 +20,7 @@ public function appCompleteHandler():void
 	var config:DropboxConfig = new DropboxConfig('', '');
 	//config.setConsumer();
 //	config.setRequestToken('', '');
-//	config.setAccessToken('', '');
+	config.setAccessToken('', '');
 	dropAPI = new DropboxClient(config);
 	
 	if (config.accessTokenKey && config.accessTokenSecret) {
@@ -241,6 +241,81 @@ public function thumbnails():void
 	dropAPI.addEventListener(DropboxEvent.THUMBNAILS_RESULT, handler);
 	if (!dropAPI.hasEventListener(DropboxEvent.THUMBNAILS_FAULT)) {
 		dropAPI.addEventListener(DropboxEvent.THUMBNAILS_FAULT, faultHandler);
+	}	
+}
+
+private var revisionDetails:Array;
+
+public function revisions():void
+{
+	dropAPI.revisions('My Document/2011.xlsx');
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.REVISION_RESULT, handler);
+		revisionsLabel.text = evt.resultObject.toString();
+		revisionDetails = evt.resultObject as Array;
+	};
+	dropAPI.addEventListener(DropboxEvent.REVISION_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.REVISION_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.REVISION_FAULT, faultHandler);
+	}	
+}
+
+public function restore_f():void
+{
+	if (revisionDetails.length > 1) {
+		dropAPI.restore('My Document/2011.xlsx', DropboxFile(revisionDetails[0]).rev);
+		var handler:Function = function (evt:DropboxEvent):void
+		{
+			dropAPI.removeEventListener(DropboxEvent.RESTORE_RESULT, handler);
+			restoreLabel.text = evt.resultObject.toString();
+		};
+		dropAPI.addEventListener(DropboxEvent.RESTORE_RESULT, handler);
+		if (!dropAPI.hasEventListener(DropboxEvent.RESTORE_FAULT)) {
+			dropAPI.addEventListener(DropboxEvent.RESTORE_FAULT, faultHandler);
+		}
+	}
+}
+
+public function search():void
+{
+	dropAPI.search('Books', 'pdf');
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.SEARCH_RESULT, handler);
+		searchLabel.text = evt.resultObject.toString();
+	};
+	dropAPI.addEventListener(DropboxEvent.SEARCH_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.SEARCH_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.SEARCH_FAULT, faultHandler);
+	}	
+}
+
+public function shares():void
+{
+	dropAPI.shares('My Document/2011.xlsx');
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.SHARES_RESULT, handler);
+		sharesLabel.text = evt.resultObject.toString();
+	};
+	dropAPI.addEventListener(DropboxEvent.SHARES_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.SHARES_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.SHARES_FAULT, faultHandler);
+	}		
+}
+
+public function media():void
+{
+	dropAPI.media('My Document/2011.xlsx');
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.MEDIA_RESULT, handler);
+		mediaLabel.text = evt.resultObject.toString();
+	};
+	dropAPI.addEventListener(DropboxEvent.MEDIA_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.MEDIA_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.MEDIA_FAULT, faultHandler);
 	}	
 }
 
