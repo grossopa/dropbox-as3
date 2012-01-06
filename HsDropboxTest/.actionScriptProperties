@@ -17,7 +17,7 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="HsDropboxAPIApp.mxml">
+    <application path="HsApp2.mxml">
       <airExcludes/>
     </application>
   </applications>

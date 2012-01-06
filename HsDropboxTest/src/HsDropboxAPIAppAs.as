@@ -110,7 +110,7 @@ public function accountInfo():void
 	}
 }
 
-private var testFolder1:String = new Date().time.toString() + "1";
+private var testFolder1:String = new Date().time.toString() + "  111";
 private var testFile:String;
 
 public function uploadFile():void
@@ -120,7 +120,7 @@ public function uploadFile():void
 	{
 		fr.removeEventListener(Event.COMPLETE, loadCompHandler);
 		testFile = fr.name;
-		dropAPI.putFile('friend icons', fr.name, fr.data);
+		dropAPI.putFile(testFolder1, fr.name, fr.data);
 		var handler:Function = function (evt:DropboxEvent):void
 		{
 			dropAPI.removeEventListener(DropboxEvent.PUT_FILE_RESULT, handler);
