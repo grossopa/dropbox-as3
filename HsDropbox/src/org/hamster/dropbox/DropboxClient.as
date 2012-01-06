@@ -532,7 +532,7 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + buildFilePath(filePath));
+			var url:String = encodeURI(this.buildFullURL(config.contentServer, '/files/' + root + '/' + buildFilePath(filePath)));
 			var params:Object = { 
 				"file" : fileName
 			};
