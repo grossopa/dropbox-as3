@@ -9,9 +9,6 @@ package org.hamster.dropbox.utils
 	import flash.net.URLRequestMethod;
 	import flash.utils.ByteArray;
 	
-	import mx.utils.ObjectUtil;
-	import mx.utils.UIDUtil;
-
 	/**
 	 * a refactor util class from org.iotashan.oauth.OAuthRequest
 	 * 
@@ -103,14 +100,14 @@ package org.hamster.dropbox.utils
 										   httpMethod:String = URLRequestMethod.GET,
 										   signMethod:String = "HMAC-SHA1"):Object
 		{
-			var result:Object = ObjectUtil.copy(params);
+			var result:Object = objectUtilCopy(params);
 			
 			if (result == null) {
 				result = new Object();
 			}
 			
 			var curDate:Date = new Date();
-			var uuid:String = UIDUtil.getUID(curDate);
+			var uuid:String = uidUtilCreateUID();
 			
 			// first, let's add the oauth required params
 			result["oauth_nonce"] = uuid;
@@ -202,7 +199,7 @@ package org.hamster.dropbox.utils
 		{
 			var ret:String = encodeURIComponent(httpMethod.toUpperCase());
 			ret += "&";
-			ret += encodeURIComponent(url);
+			ret += encodeURIComponent(encodeURL(url));
 			ret += "&";
 			
 			var aParams:Array = new Array();
@@ -218,6 +215,95 @@ package org.hamster.dropbox.utils
 			// return them like a querystring
 			ret += encodeURIComponent(aParams.join("&"));
 			return ret;
+		}
+		
+		private static function encodeURL(url:String):String
+		{
+			var protocol:String = getProtocol(url);
+			var tempURL:String = url.substring(protocol.length + 3);
+			
+			var paths:Array = tempURL.split('/');
+			for (var i:int = 0; i < paths.length; i++) {
+				paths[i] = encodeURIComponent(paths[i]);
+			}
+			return protocol + "://" + paths.join('/');
+		}
+		
+		public static function getProtocol(url:String):String
+		{
+			var slash:int = url.indexOf("/");
+			var indx:int = url.indexOf(":/");
+			if (indx > -1 && indx < slash)
+			{
+				return url.substring(0, indx);
+			}
+			else
+			{
+				indx = url.indexOf("::");
+				if (indx > -1 && indx < slash)
+					return url.substring(0, indx);
+			}
+			
+			return "";
+		}
+		
+		public static function objectUtilCopy(value:Object):Object
+		{
+			var buffer:ByteArray = new ByteArray();
+			buffer.writeObject(value);
+			buffer.position = 0;
+			var result:Object = buffer.readObject();
+			return result;
+		}
+		
+		private static const ALPHA_CHAR_CODES:Array = [48, 49, 50, 51, 52, 53, 54, 
+			55, 56, 57, 65, 66, 67, 68, 69, 70];
+		private static function uidUtilCreateUID():String
+		{
+			var uid:Array = new Array(36);
+			var index:int = 0;
+			
+			var i:int;
+			var j:int;
+			
+			for (i = 0; i < 8; i++)
+			{
+				uid[index++] = ALPHA_CHAR_CODES[Math.floor(Math.random() *  16)];
+			}
+			
+			for (i = 0; i < 3; i++)
+			{
+				uid[index++] = 45; // charCode for "-"
+				
+				for (j = 0; j < 4; j++)
+				{
+					uid[index++] = ALPHA_CHAR_CODES[Math.floor(Math.random() *  16)];
+				}
+			}
+			
+			uid[index++] = 45; // charCode for "-"
+			
+			var time:Number = new Date().getTime();
+			// Note: time is the number of milliseconds since 1970,
+			// which is currently more than one trillion.
+			// We use the low 8 hex digits of this number in the UID.
+			// Just in case the system clock has been reset to
+			// Jan 1-4, 1970 (in which case this number could have only
+			// 1-7 hex digits), we pad on the left with 7 zeros
+			// before taking the low digits.
+			var timeString:String = ("0000000" + time.toString(16).toUpperCase()).substr(-8);
+			
+			for (i = 0; i < 8; i++)
+			{
+				uid[index++] = timeString.charCodeAt(i);
+			}
+			
+			for (i = 0; i < 4; i++)
+			{
+				uid[index++] = ALPHA_CHAR_CODES[Math.floor(Math.random() *  16)];
+			}
+			
+			return String.fromCharCode.apply(null, uid);
 		}
 		
 		/**

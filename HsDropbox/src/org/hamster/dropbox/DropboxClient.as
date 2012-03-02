@@ -22,43 +22,42 @@ package org.hamster.dropbox
 	import org.hamster.dropbox.utils.OAuthHelper;
 	
 	import ru.inspirit.net.MultipartURLLoader;
-
-	[Event(name="accountCreateResult",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="accountCreateFault",   type="org.hamster.dropbox.DropboxEvent")]
 	
-	[Event(name="requestTokenResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="requestTokenFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="accessTokenResult",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="accessTokenFault",   type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="tokenResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="tokenFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccountCreateResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccountCreateFault", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RequestTokenResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RequestTokenFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccessTokenResult",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccessTokenFault",   type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_TokenResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_TokenFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
-	[Event(name="accountInfoResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="accountInfoFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="putFileResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="putFileFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileCopyResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileCopyFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileCreateFolderResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileCreateFolderFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileDeleteResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileDeleteFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileMoveResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="fileMoveFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="getFileResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="getFileFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="metadataResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="metadataFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="revisionResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="revisionFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="restoreResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="restoreFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="searchResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="searchFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="sharesResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="sharesFault",  type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="mediaResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="mediaFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccountInfoResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_AccountInfoFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_PutFileResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_PutFileFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileCopyResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileCopyFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileCreateFolderResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileCreateFolderFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileDeleteResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileDeleteFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileMoveResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FileMoveFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_GetFileResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_GetFileFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_MetadataResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_MetadataFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RevisionResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RevisionFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RestoreResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_RestoreFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_SearchResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_SearchFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_SharesResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_SharesFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_MediaResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_FMediaFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
 	/**
 	 * Dropbox client class, in order to use, you should build an instance of
@@ -448,7 +447,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'locale', locale);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/metadata/' + root + '/' + buildFilePath(path), params);
+				config.server, '/metadata/' + root + '/' + path, params);
 			return this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
 		}
@@ -473,7 +472,7 @@ package org.hamster.dropbox
 				"size" : size
 			};
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/thumbnails/" + root + '/' + buildFilePath(pathToPhoto), params);
+				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
 			return this.load(urlRequest, DropboxEvent.THUMBNAILS_RESULT, 
 				DropboxEvent.THUMBNAILS_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -502,7 +501,7 @@ package org.hamster.dropbox
 				}
 			}
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' +  buildFilePath(filePath), params);
+				config.contentServer, "/files/" + root + '/' +  filePath, params);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -532,7 +531,7 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = encodeURI(this.buildFullURL(config.contentServer, '/files/' + root + '/' + buildFilePath(filePath)));
+			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + filePath);
 			var params:Object = { 
 				"file" : fileName
 			};
@@ -571,7 +570,7 @@ package org.hamster.dropbox
 								  root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/revisions/' + root + '/' +  buildFilePath(filePathWithName), null);
+				config.server, '/revisions/' + root + '/' +  filePathWithName, null);
 			return this.load(urlRequest, DropboxEvent.REVISION_RESULT, 
 				DropboxEvent.REVISION_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
 		}
@@ -605,7 +604,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'locale', locale);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/restore/' + root + '/' +  buildFilePath(filePathWithName), params, URLRequestMethod.POST);
+				config.server, '/restore/' + root + '/' +  filePathWithName, params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.RESTORE_RESULT, 
 				DropboxEvent.RESTORE_FAULT, DROPBOX_FILE, URLLoaderDataFormat.TEXT);			
 		}
@@ -641,7 +640,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'include_deleted', include_deleted);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/search/' + root + '/' +  buildFilePath(filePath), params, URLRequestMethod.POST);
+				config.server, '/search/' + root + '/' +  filePath, params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.SEARCH_RESULT, 
 				DropboxEvent.SEARCH_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
 		}
@@ -666,7 +665,7 @@ package org.hamster.dropbox
 							   root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/shares/' + root + '/' +  buildFilePath(filePathWithName), null);
+				config.server, '/shares/' + root + '/' +  filePathWithName, null);
 			return this.load(urlRequest, DropboxEvent.SHARES_RESULT, 
 				DropboxEvent.SHARES_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
@@ -698,7 +697,7 @@ package org.hamster.dropbox
 			}
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/media/' + root + '/' +  buildFilePath(filePathWithName), params, URLRequestMethod.POST);
+				config.server, '/media/' + root + '/' +  filePathWithName, params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.MEDIA_RESULT, 
 				DropboxEvent.MEDIA_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
