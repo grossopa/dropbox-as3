@@ -11,9 +11,16 @@ import org.hamster.dropbox.DropboxClient;
 import org.hamster.dropbox.DropboxConfig;
 import org.hamster.dropbox.DropboxEvent;
 import org.hamster.dropbox.models.AccountInfo;
+import org.hamster.dropbox.models.CopyRef;
+import org.hamster.dropbox.models.Delta;
 import org.hamster.dropbox.models.DropboxFile;
 
 [Bindable] public var dropAPI:DropboxClient;
+public static const FOLDER:String = "test test/bb#$()+%\'\'asdf";
+public static const FILE_NAME:String = "aa#$()+%\'\'asdf.txt";
+//public static const FOLDER:String = "test test/bb";
+//public static const FILE_NAME:String = "#asdf.txt";
+public static const FILE_NAME_WITH_PATH:String = FOLDER + '/' + FILE_NAME;
 
 public function appCompleteHandler():void
 {
@@ -110,8 +117,8 @@ public function accountInfo():void
 	}
 }
 
-private var testFolder1:String = new Date().time.toString() + "  111";
-private var testFile:String;
+//private var testFolder1:String = new Date().time.toString() + "  111/222 444";
+//private var testFile:String;
 
 public function uploadFile():void
 {
@@ -119,8 +126,8 @@ public function uploadFile():void
 	var loadCompHandler:Function = function (evt:Event):void
 	{
 		fr.removeEventListener(Event.COMPLETE, loadCompHandler);
-		testFile = fr.name;
-		dropAPI.putFile(testFolder1, fr.name, fr.data);
+		//testFile = fr.name;
+		dropAPI.putFile(FOLDER, fr.name, fr.data);
 		var handler:Function = function (evt:DropboxEvent):void
 		{
 			dropAPI.removeEventListener(DropboxEvent.PUT_FILE_RESULT, handler);
@@ -143,7 +150,7 @@ public function uploadFile():void
 
 public function copyFile():void
 {
-	dropAPI.fileCopy(testFolder1 + '/' + testFile, testFolder1 + '/copied_' + testFile);
+	dropAPI.fileCopy(FILE_NAME_WITH_PATH, FILE_NAME_WITH_PATH + "." + testFolder);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.FILE_COPY_RESULT, handler);
@@ -160,7 +167,7 @@ private var testFolder:String = new Date().time.toString();
 
 public function createFolder():void
 {
-	dropAPI.fileCreateFolder(testFolder, 'dropbox');
+	dropAPI.fileCreateFolder(FOLDER + '.' + testFolder, 'dropbox');
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.FILE_CREATE_FOLDER_RESULT, handler);
@@ -175,7 +182,7 @@ public function createFolder():void
 
 public function moveFile():void
 {
-	dropAPI.fileMove('friend icons/15414659_265289702  aa.jpg', 'friend icons/15414659_265289702  bb.jpg');
+	dropAPI.fileMove(FILE_NAME_WITH_PATH, FILE_NAME_WITH_PATH + testFolder);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.FILE_MOVE_RESULT, handler);
@@ -190,7 +197,7 @@ public function moveFile():void
 
 public function deleteFile():void
 {
-	dropAPI.fileDelete(testFolder1 + '/moved_' + testFile);
+	dropAPI.fileDelete(FILE_NAME_WITH_PATH + '.' + testFolder);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.FILE_DELETE_RESULT, handler);
@@ -204,7 +211,7 @@ public function deleteFile():void
 
 public function getFile():void
 {
-	dropAPI.getFile('friend icons/15414659_265289702  aa.jpg', "0");
+	dropAPI.getFile(FILE_NAME_WITH_PATH, "0");
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.GET_FILE_RESULT, handler);
@@ -218,7 +225,7 @@ public function getFile():void
 
 public function metadata():void
 {
-	dropAPI.metadata('friend icons/15414659_265289702  aa.jpg', 1000, "", true);
+	dropAPI.metadata(FILE_NAME_WITH_PATH, 1000, "", true);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.METADATA_RESULT, handler);
@@ -232,7 +239,7 @@ public function metadata():void
 
 public function thumbnails():void
 {
-	dropAPI.thumbnails('friend icons/15414659_265289702  aa.jpg', "");
+	dropAPI.thumbnails(FILE_NAME_WITH_PATH, "");
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.THUMBNAILS_RESULT, handler);
@@ -248,7 +255,7 @@ private var revisionDetails:Array;
 
 public function revisions():void
 {
-	dropAPI.revisions('My Document/2011.xlsx');
+	dropAPI.revisions(FILE_NAME_WITH_PATH);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.REVISION_RESULT, handler);
@@ -264,7 +271,7 @@ public function revisions():void
 public function restore_f():void
 {
 	if (revisionDetails.length > 1) {
-		dropAPI.restore('My Document/2011.xlsx', DropboxFile(revisionDetails[0]).rev);
+		dropAPI.restore(FILE_NAME_WITH_PATH + "." + testFolder, DropboxFile(revisionDetails[0]).rev);
 		var handler:Function = function (evt:DropboxEvent):void
 		{
 			dropAPI.removeEventListener(DropboxEvent.RESTORE_RESULT, handler);
@@ -293,7 +300,7 @@ public function search():void
 
 public function shares():void
 {
-	dropAPI.shares('My Document/2011.xlsx');
+	dropAPI.shares(FILE_NAME_WITH_PATH);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.SHARES_RESULT, handler);
@@ -307,7 +314,7 @@ public function shares():void
 
 public function media():void
 {
-	dropAPI.media('My Document/2011.xlsx');
+	dropAPI.media(FILE_NAME_WITH_PATH);
 	var handler:Function = function (evt:DropboxEvent):void
 	{
 		dropAPI.removeEventListener(DropboxEvent.MEDIA_RESULT, handler);
@@ -316,6 +323,38 @@ public function media():void
 	dropAPI.addEventListener(DropboxEvent.MEDIA_RESULT, handler);
 	if (!dropAPI.hasEventListener(DropboxEvent.MEDIA_FAULT)) {
 		dropAPI.addEventListener(DropboxEvent.MEDIA_FAULT, faultHandler);
+	}	
+}
+
+private var cursor:String = "";
+public function delta():void
+{
+	dropAPI.delta(cursor);
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.DELTA_RESULT, handler);
+		var delta:Delta = evt.resultObject as Delta;
+		deltaLabel.text = delta.toString();
+		cursor = delta.cursor;
+	};
+	dropAPI.addEventListener(DropboxEvent.DELTA_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.DELTA_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.DELTA_FAULT, faultHandler);
+	}	
+}
+
+public function copyRef():void
+{
+	dropAPI.copyRef(FILE_NAME_WITH_PATH);
+	var handler:Function = function (evt:DropboxEvent):void
+	{
+		dropAPI.removeEventListener(DropboxEvent.COPY_REF_RESULT, handler);
+		var copyRef:CopyRef = evt.resultObject as CopyRef;
+		copyRefLabel.text = copyRef.toString();
+	};
+	dropAPI.addEventListener(DropboxEvent.COPY_REF_RESULT, handler);
+	if (!dropAPI.hasEventListener(DropboxEvent.COPY_REF_FAULT)) {
+		dropAPI.addEventListener(DropboxEvent.COPY_REF_FAULT, faultHandler);
 	}	
 }
 

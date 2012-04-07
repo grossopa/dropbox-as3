@@ -95,6 +95,15 @@
 				<s:Button label="Media" click="media()" width="130" />
 				<s:TextInput id="mediaLabel" width="100%" />
 			</s:HGroup>
+			
+			<s:HGroup width="100%">
+				<s:Button label="Delta" click="delta()" width="130" />
+				<s:TextInput id="deltaLabel" width="100%" />
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Button label="CopyRef" click="copyRef()" width="130" />
+				<s:TextInput id="copyRefLabel" width="100%" />
+			</s:HGroup>
 		</s:VGroup>
 		
 	</s:VGroup>

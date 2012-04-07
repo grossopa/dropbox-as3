@@ -52,6 +52,10 @@ package org.hamster.dropbox
 		public static const SHARES_FAULT:String		= 'DropboxEvent_SharesFault';
 		public static const MEDIA_RESULT:String		= 'DropboxEvent_MediaResult';
 		public static const MEDIA_FAULT:String		= 'DropboxEvent_MediaFault';
+		public static const DELTA_RESULT:String		= 'DropboxEvent_DeltaResult';
+		public static const DELTA_FAULT:String		= 'DropboxEvent_DeltaFault';
+		public static const COPY_REF_RESULT:String	= 'DropboxEvent_CopyRefResult';
+		public static const COPY_REF_FAULT:String	= 'DropboxEvent_CopyRefFault';
 		
 		/**
 		 * related URLLoader Event. 

@@ -199,14 +199,14 @@ package org.hamster.dropbox.utils
 		{
 			var ret:String = encodeURIComponent(httpMethod.toUpperCase());
 			ret += "&";
-			ret += encodeURIComponent(encodeURL(url));
+			ret += encodeURIComponent(url);
 			ret += "&";
 			
 			var aParams:Array = new Array();
 			// loop over params, find the ones we need
 			for (var param:String in params) {
 				if (param != "oauth_signature" && param != "locale" && param != 'overwrite') {
-					aParams.push(param + "=" + encodeURIComponent(params[param].toString()));
+					aParams.push(param + "=" + encodeParam(params[param].toString()));
 				}
 			}
 			// put them in the right order
@@ -217,16 +217,25 @@ package org.hamster.dropbox.utils
 			return ret;
 		}
 		
-		private static function encodeURL(url:String):String
+		public static function encodeURL(url:String):String
 		{
 			var protocol:String = getProtocol(url);
 			var tempURL:String = url.substring(protocol.length + 3);
 			
 			var paths:Array = tempURL.split('/');
 			for (var i:int = 0; i < paths.length; i++) {
-				paths[i] = encodeURIComponent(paths[i]);
+				paths[i] = escape(paths[i]).split('@').join("%40").split("+").join("%2B");
 			}
-			return protocol + "://" + paths.join('/');
+			return protocol + "://" + paths.join('%2F');
+		}
+		
+		private static function encodeParam(param:String):String
+		{
+			var paths:Array = param.split('/');
+			for (var i:int = 0; i < paths.length; i++) {
+				paths[i] = escape(paths[i]);
+			}
+			return paths.join('%2F').split('@').join("%40").split("+").join("%2B");
 		}
 		
 		public static function getProtocol(url:String):String

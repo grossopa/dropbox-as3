@@ -1,5 +1,6 @@
 package org.hamster.dropbox
 {
+	
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.errors.IOError;
@@ -17,6 +18,8 @@ package org.hamster.dropbox
 	import mx.utils.URLUtil;
 	
 	import org.hamster.dropbox.models.AccountInfo;
+	import org.hamster.dropbox.models.CopyRef;
+	import org.hamster.dropbox.models.Delta;
 	import org.hamster.dropbox.models.DropboxFile;
 	import org.hamster.dropbox.models.SharesInfo;
 	import org.hamster.dropbox.utils.OAuthHelper;
@@ -57,7 +60,11 @@ package org.hamster.dropbox
 	[Event(name="DropboxEvent_SharesResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_SharesFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_MediaResult", type="org.hamster.dropbox.DropboxEvent")]
-	[Event(name="DropboxEvent_FMediaFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_MediaFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_DeltaResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_DeltaFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_CopyRefResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_CopyRefFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
 	/**
 	 * Dropbox client class, in order to use, you should build an instance of
@@ -92,6 +99,8 @@ package org.hamster.dropbox
 		protected static const DROPBOX_FILE:String = 'dropbox_file';
 		protected static const DROPBOX_FILE_LIST:String = 'dropbox_file_list';
 		protected static const SHARES_INFO:String = 'shares_info';
+		protected static const DELTA_INFO:String = 'delta_info';
+		protected static const COPY_REF_INFO:String = 'copy_ref_info';
 		
 		/**
 		 * xperiments UPDATE 
@@ -256,7 +265,7 @@ package org.hamster.dropbox
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			var resultObject:*;
 			try {
-				var accessToken:Object = JSON.decode(urlLoader.data);
+				var accessToken:Object = com.adobe.serialization.json.JSON.decode(urlLoader.data);
 				this.config.accessTokenKey = accessToken.token;
 				this.config.accessTokenSecret = accessToken.secret;
 				resultObject = accessToken;
@@ -310,17 +319,25 @@ package org.hamster.dropbox
 		 * 
 		 * @param fromPath
 		 * @param toPath
+		 * @param fromCopyRef optional, if it's not empty, then ignore fromPath parameter
 		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
 		public function fileCopy(fromPath:String, toPath:String, 
-								 root:String = DropboxConfig.DROPBOX):URLLoader
+								 root:String = DropboxConfig.DROPBOX,
+								 fromCopyRef:String = ""):URLLoader
 		{
 			var params:Object = { 
 				"root": root, 
-				"from_path": fromPath,
 				"to_path": toPath
 			};
+			
+			if (fromCopyRef != null && fromCopyRef.length > 0) {
+				buildOptionalParameters(params, "from_copy_ref", fromCopyRef);
+			} else {
+				params["from_path"] = fromPath;
+			}
+			
 			var urlRequest:URLRequest = buildURLRequest(
 				config.server, "/fileops/copy", params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.FILE_COPY_RESULT, 
@@ -501,7 +518,7 @@ package org.hamster.dropbox
 				}
 			}
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' +  filePath, params);
+				config.contentServer, "/files/" + root + '/' + filePath, params);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -531,7 +548,7 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + filePath);
+			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + encodeURL(filePath));
 			var params:Object = { 
 				"file" : fileName
 			};
@@ -697,9 +714,60 @@ package org.hamster.dropbox
 			}
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/media/' + root + '/' +  filePathWithName, params, URLRequestMethod.POST);
+				config.server, '/media/' + root + '/' + filePathWithName, params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.MEDIA_RESULT, 
 				DropboxEvent.MEDIA_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
+		}
+		
+		/**
+		 * A way of letting you keep up with changes to files and folders in a user's Dropbox. 
+		 * You can periodically call /delta to get a list of "delta entries", 
+		 * which are instructions on how to update your local state to match the server's state.
+		 * 
+		 * <p>https://api.dropbox.com/1/delta</p>
+		 * <p>version: 1</p>
+		 * <p>methods: POST</p>
+		 * <p>results: Delta information.</p>
+		 * 
+		 * @param cursor
+		 * @param locale
+		 * @return urlLoader
+		 */
+		public function delta(cursor:String = null, locale:String = ""):URLLoader
+		{
+			var params:Object = new Object();
+			buildOptionalParameters(params, 'cursor', cursor);
+			buildOptionalParameters(params, 'locale', locale);
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, "/delta", params, URLRequestMethod.POST);
+			return this.load(urlRequest, DropboxEvent.DELTA_RESULT, 
+				DropboxEvent.DELTA_FAULT, DELTA_INFO);
+		}
+		
+		/**
+		 * Creates and returns a copy_ref to a file. 
+		 * This reference string can be used to copy that file to another 
+		 * user's Dropbox by passing it in as the from_copy_ref parameter 
+		 * on /fileops/copy.
+		 * 
+		 * <p>https://api.dropbox.com/1/copy_ref/<root>/<path></p>
+		 * <p>version: 1</p>
+		 * <p>methods: GET</p>
+		 * <p>results: CopyRef information.</p>
+		 * 
+		 * @param filePathWithName
+		 * @return urlLoader
+		 */
+		public function copyRef(filePathWithName:String,
+								root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var params:Object = new Object();
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.server, '/copy_ref/' + root + '/' + filePathWithName, null);
+			return this.load(urlRequest, DropboxEvent.COPY_REF_RESULT, 
+				DropboxEvent.COPY_REF_FAULT, COPY_REF_INFO);
 		}
 		
 		/**
@@ -716,6 +784,7 @@ package org.hamster.dropbox
 									    httpMethod:String = URLRequestMethod.GET,
 									    protocol:String = 'http'):URLRequest
 		{
+			target  = encodeURL(target);
 			var url:String = this.buildFullURL(apiHost, target, protocol);
 			
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
@@ -728,6 +797,15 @@ package org.hamster.dropbox
 			urlRequest.data = URLUtil.objectToString(params, '&');
 			urlRequest.url = url;
 			return urlRequest;
+		}
+		
+		private static function encodeURL(url:String):String
+		{
+			var paths:Array = url.split('/');
+			for (var i:int = 0; i < paths.length; i++) {
+				paths[i] = escape(paths[i]).split('@').join("%40").split("+").join("%2B");
+			}
+			return paths.join('/');
 		}
 		
 		/**
@@ -786,15 +864,15 @@ package org.hamster.dropbox
 					resultObject = accessToken;
 				} else if (urlLoader.resultType == ACCOUNT_INFO) {
 					var accountInfo:AccountInfo = new AccountInfo();
-					accountInfo.decode(JSON.decode(urlLoader.data));
+					accountInfo.decode(com.adobe.serialization.json.JSON.decode(urlLoader.data));
 					resultObject = accountInfo;
 				} else if (urlLoader.resultType == DROPBOX_FILE) {
 					var dropboxFile:DropboxFile = new DropboxFile();
-					dropboxFile.decode(JSON.decode(urlLoader.data));
+					dropboxFile.decode(com.adobe.serialization.json.JSON.decode(urlLoader.data));
 					resultObject = dropboxFile;
 				} else if (urlLoader.resultType == DROPBOX_FILE_LIST) {
 					var array:Array = new Array();
-					var resultArray:* = JSON.decode(urlLoader.data);
+					var resultArray:* = com.adobe.serialization.json.JSON.decode(urlLoader.data);
 					for each (var ro:Object in resultArray) {
 						var df:DropboxFile = new DropboxFile();
 						df.decode(ro);
@@ -803,8 +881,16 @@ package org.hamster.dropbox
 					resultObject = array;
 				} else if (urlLoader.resultType == SHARES_INFO) {
 					var sharesInfo:SharesInfo = new SharesInfo();
-					sharesInfo.decode(JSON.decode(urlLoader.data));
+					sharesInfo.decode(com.adobe.serialization.json.JSON.decode(urlLoader.data));
 					resultObject = sharesInfo;
+				} else if (urlLoader.resultType == DELTA_INFO) {
+					var delta:Delta = new Delta();
+					delta.decode(com.adobe.serialization.json.JSON.decode(urlLoader.data));
+					resultObject = delta;
+				} else if (urlLoader.resultType == COPY_REF_INFO) {
+					var copyRef:CopyRef = new CopyRef();
+					copyRef.decode(com.adobe.serialization.json.JSON.decode(urlLoader.data));
+					resultObject = copyRef;
 				} else {
 					resultObject = urlLoader.data;
 				}
@@ -914,25 +1000,6 @@ package org.hamster.dropbox
 				protocol += "://";
 			}
 			return protocol + host + portString + (target == "" ? "" : '/' + config.apiVersion + target); 
-		}
-		
-		/**
-		 * encode file path.
-		 *  
-		 * @param filePath
-		 * @return encoded file path
-		 * 
-		 */
-		private static function buildFilePath(filePath:String):String
-		{
-			if (filePath.indexOf('/') < 0) {
-				return filePath;
-			}
-			var filePaths:Array = filePath.split('/');
-			for (var i:int = 0; i < filePaths.length; i++) {
-				filePaths[i] = encodeURIComponent(filePaths[i]);
-			}
-			return filePaths.join('/');
 		}
 		
 		private static function buildOptionalParameters(paramTarget:Object, paramName:String, paramValue:*):void

@@ -2,6 +2,7 @@
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="org.hamster.dropbox.models.SharesInfo"/>
+    <classEntry path="org.hamster.dropbox.models.CopyRef"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
