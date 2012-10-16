@@ -93,6 +93,16 @@ package org.hamster.dropbox
 	 */
 	public class DropboxClient extends EventDispatcher
 	{
+		public static const CHARACTER_ENCODING_MAPPING:Array = [
+			{charFrom : '#', charTo : '%23'},
+			{charFrom : '$', charTo : '%24'},
+			{charFrom : '(', charTo : '%28'},
+			{charFrom : ')', charTo : '%29'},
+			{charFrom : "'", charTo : '%27'},
+			{charFrom : "@", charTo : '%40'},
+			{charFrom : "+", charTo : '%2B'},
+		];
+		
 		protected static const REQUEST_TOKEN:String = 'request_token';
 		protected static const ACCESS_TOKEN:String = 'access_token';
 		protected static const ACCOUNT_INFO:String = 'account_info';
@@ -803,7 +813,11 @@ package org.hamster.dropbox
 		{
 			var paths:Array = url.split('/');
 			for (var i:int = 0; i < paths.length; i++) {
-				paths[i] = escape(paths[i]).split('@').join("%40").split("+").join("%2B");
+				var str:String = encodeURI(paths[i]);
+				for each (var charObj:Object in CHARACTER_ENCODING_MAPPING) {
+					str = str.split(charObj.charFrom).join(charObj.charTo);
+				}
+				paths[i] = str;
 			}
 			return paths.join('/');
 		}
