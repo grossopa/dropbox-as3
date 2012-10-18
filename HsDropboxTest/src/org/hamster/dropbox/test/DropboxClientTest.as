@@ -37,6 +37,7 @@ package org.hamster.dropbox.test
 		public static var TEST_IMAGE:Class;
 		
 		public static const DEFAULT_TIMEOUT:Number = 30000;
+		public static const LONG_TIMEOUT:Number = 100000;
 		/**
 		 * < (less than)
 		 * > (greater than)
@@ -54,10 +55,12 @@ package org.hamster.dropbox.test
 		public static const FILE_2:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文2.txt";
 		public static const FILE_3:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3.txt";
 		public static const FILE_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3.jpg";
+		public static const FILE_CHUNK_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文4.jpg";
 		public static const FOLDER_FILE:String = FOLDER + "/" + FILE;
 		public static const FOLDER_FILE_2:String = FOLDER + "/" + FILE_2;
 		public static const FOLDER_FILE_3:String = FOLDER + "/" + FILE_3;
 		public static const FOLDER_IMAGE:String = FOLDER + "/" + FILE_IMAGE;
+		public static const FOLDER_CHUNK_IMAGE:String = FOLDER + "/" + FILE_CHUNK_IMAGE;
 		public static const uploadContent:ByteArray = new ByteArray();
 		public static var uploadContentImage:ByteArray = new ByteArray();
 		public static var lastDropboxFile:DropboxFile;
@@ -97,6 +100,9 @@ package org.hamster.dropbox.test
 			dropboxClient.addEventListener(DropboxEvent.SHARES_FAULT, faultHandler);
 			dropboxClient.addEventListener(DropboxEvent.THUMBNAILS_FAULT, faultHandler);
 			dropboxClient.addEventListener(DropboxEvent.TOKEN_FAULT, faultHandler);
+			
+			dropboxClient.addEventListener(DropboxEvent.CHUNKED_UPLOAD_FAULT, faultHandler);
+			dropboxClient.addEventListener(DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT, faultHandler);
 			
 			Assert.assertNotNull(dropboxClient.config.consumerKey, dropboxClient.config.consumerSecret);
 		}
@@ -186,7 +192,7 @@ package org.hamster.dropbox.test
 		public function testPutFile():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
-				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, null));
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
 			dropboxClient.putFile(FOLDER, FILE, uploadContent);
 		}
 		
@@ -259,7 +265,7 @@ package org.hamster.dropbox.test
 		public function testPutFile_putImage():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
-				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT));
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
 			dropboxClient.putFile(FOLDER, FILE_IMAGE, uploadContentImage);
 		}
 		
@@ -267,7 +273,7 @@ package org.hamster.dropbox.test
 		public function testThumbnails():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.THUMBNAILS_RESULT, 
-				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: Array}));
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT));
 			dropboxClient.thumbnails(FOLDER_IMAGE, "medium");
 		}
 		
@@ -301,6 +307,18 @@ package org.hamster.dropbox.test
 			dropboxClient.addEventListener(DropboxEvent.MEDIA_RESULT, 
 				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: SharesInfo}));
 			dropboxClient.media(FOLDER_IMAGE);
+		}
+		
+		[Test(async, order=40)]
+		public function testChunkedUpload():void
+		{
+			dropboxClient.addEventListener(DropboxEvent.CHUNKED_UPLOAD_RESULT, function (event:DropboxEvent):void {
+				trace ("Chunk Done : " + event.type + " " + event.resultObject);
+			});
+			
+			dropboxClient.addEventListener(DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT, 
+				Async.asyncHandler(this, resultHandler, LONG_TIMEOUT));
+			dropboxClient.chunkedUpload(FOLDER, FILE_CHUNK_IMAGE, uploadContentImage, 50000);
 		}
 		
 		[Test(async, order=99)]

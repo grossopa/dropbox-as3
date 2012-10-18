@@ -60,6 +60,21 @@ package org.hamster.dropbox.models
 			}
 		}
 		
+		/**
+		 * {
+		 * "revision": 62966514, 
+		 * "rev": "3c0caf20034507a", 
+		 * "thumb_exists": true, 
+		 * "bytes": 97725, 
+		 * "modified": "Thu, 18 Oct 2012 08:03:08 +0000", 
+		 * "client_mtime": "Thu, 18 Oct 2012 08:03:08 +0000", 
+		 * "path": "/test folder/test ~`!@#$%^&()_-=+{}[];',.123\u4e2d\u6587/test ~`!@#$%^&()_-=+{}[];',.123\u4e2d\u65873.jpg", 
+		 * "is_dir": false, 
+		 * "icon": "page_white_picture", 
+		 * "root": "dropbox", 
+		 * "mime_type": "image/jpeg", 
+		 * "size": "95.4 KB"}
+		 */
 		override public function toString():String 
 		{
 			var s:String = "DropboxFile [bytes=" + bytes

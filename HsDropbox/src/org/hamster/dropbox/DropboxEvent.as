@@ -57,6 +57,11 @@ package org.hamster.dropbox
 		public static const COPY_REF_RESULT:String	= 'DropboxEvent_CopyRefResult';
 		public static const COPY_REF_FAULT:String	= 'DropboxEvent_CopyRefFault';
 		
+		public static const CHUNKED_UPLOAD_RESULT:String = 'DropboxEvent_ChunkedUploadResult';
+		public static const CHUNKED_UPLOAD_FAULT:String  = 'DropboxEvent_ChunkedUploadFault';
+		public static const COMMIT_CHUNKED_UPLOAD_RESULT:String = 'DropboxEvent_CommitChunkedUploadResult';
+		public static const COMMIT_CHUNKED_UPLOAD_FAULT:String = 'DropboxEvent_CommitChunkedUploadFault';
+		
 		/**
 		 * related URLLoader Event. 
 		 */

@@ -230,7 +230,7 @@ package org.hamster.dropbox.utils
 			var aParams:Array = new Array();
 			// loop over params, find the ones we need
 			for (var param:String in params) {
-				if (param != "oauth_signature" && param != "locale" && param != 'overwrite') {
+				if (param != "oauth_signature") {
 					aParams.push(param + "=" + encodeURICharacter(params[param].toString()).split('/').join('%2F'));
 				}
 			}

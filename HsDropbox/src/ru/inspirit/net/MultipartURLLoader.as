@@ -283,7 +283,7 @@ package ru.inspirit.net
 			var urlRequest:URLRequest = new URLRequest();
 			urlRequest.url = _path;
 		//	urlRequest.contentType = 'multipart/form-data; boundary=' + getBoundary();
-			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.method = URLRequestMethod.PUT;
 			urlRequest.data = _data;
 			
 			urlRequest.requestHeaders.push( new URLRequestHeader('Content-type', 'multipart/form-data; boundary=' + getBoundary()) );

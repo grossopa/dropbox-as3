@@ -18,13 +18,13 @@ package org.hamster.dropbox
 	import mx.utils.URLUtil;
 	
 	import org.hamster.dropbox.models.AccountInfo;
+	import org.hamster.dropbox.models.ChunkedUpload;
 	import org.hamster.dropbox.models.CopyRef;
 	import org.hamster.dropbox.models.Delta;
 	import org.hamster.dropbox.models.DropboxFile;
 	import org.hamster.dropbox.models.SharesInfo;
+	import org.hamster.dropbox.services.ChunkedUploadSession;
 	import org.hamster.dropbox.utils.OAuthHelper;
-	
-	import ru.inspirit.net.MultipartURLLoader;
 	
 	[Event(name="DropboxEvent_AccountCreateResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_AccountCreateFault", type="org.hamster.dropbox.DropboxEvent")]
@@ -66,6 +66,12 @@ package org.hamster.dropbox
 	[Event(name="DropboxEvent_CopyRefResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_CopyRefFault",  type="org.hamster.dropbox.DropboxEvent")]
 	
+	[Event(name="DropboxEvent_ChunkedUploadResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_ChunkedUploadFault",  type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_CommitChunkedUploadResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_CommitChunkedUploadFault",  type="org.hamster.dropbox.DropboxEvent")]
+	
+	
 	/**
 	 * Dropbox client class, in order to use, you should build an instance of
 	 * it and put a DropboxConfig instance into it.
@@ -87,30 +93,51 @@ package org.hamster.dropbox
 	 *  
 	 * <p>Each API function will return a URLLoader instance which load(urlReqeust:URLRequest)
 	 * has been called, you can register other listeners if you want. After the request is
-	 * done, the corresponding event will be dispatched from this class.</li>
+	 * done, the corresponding event will be dispatched from this class.</p>
 	 * 
 	 * @author yinzeshuo
 	 */
 	public class DropboxClient extends EventDispatcher
 	{
-		protected static const REQUEST_TOKEN:String = 'request_token';
-		protected static const ACCESS_TOKEN:String = 'access_token';
-		protected static const ACCOUNT_INFO:String = 'account_info';
-		protected static const DROPBOX_FILE:String = 'dropbox_file';
-		protected static const DROPBOX_FILE_LIST:String = 'dropbox_file_list';
-		protected static const SHARES_INFO:String = 'shares_info';
-		protected static const DELTA_INFO:String = 'delta_info';
-		protected static const COPY_REF_INFO:String = 'copy_ref_info';
-		
+		protected static const REQUEST_TOKEN:String       = 'request_token';
+		protected static const ACCESS_TOKEN:String        = 'access_token';
 		/**
-		 * xperiments UPDATE 
+		 * model type AccountInfo
 		 */
-		protected static const ACCOUNT_CREATE:String = 'account_create';
+		protected static const ACCOUNT_INFO:String        = 'account_info';
+		/**
+		 * model type DropboxFile
+		 */
+		protected static const DROPBOX_FILE:String        = 'dropbox_file';
+		/**
+		 * model type Array Of DropboxFile
+		 */
+		protected static const DROPBOX_FILE_LIST:String   = 'dropbox_file_list';
+		/**
+		 * model type SharesInfo
+		 */
+		protected static const SHARES_INFO:String         = 'shares_info';
+		/**
+		 * model type DeltaInfo
+		 */
+		protected static const DELTA_INFO:String          = 'delta_info';
+		/**
+		 * model type CopyRefInfo
+		 */
+		protected static const COPY_REF_INFO:String       = 'copy_ref_info';
+		protected static const ACCOUNT_CREATE:String      = 'account_create';
 		
 		/**
 		 * @private
 		 */
 		private var _config:DropboxConfig;
+		
+		/**
+		 * @private
+		 * 
+		 * stores a list of unfinished chunked upload session
+		 */
+		private var _chunkedUploadSessionList:Array = new Array();
 		
 		/**
 		 * @private
@@ -131,7 +158,13 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * xperiments UPDATE 
+		 * create an account.
+		 * 
+		 * @param email
+		 * @param password
+		 * @param first_name
+		 * @param last_name
+		 * @return URLLoader
 		 */
 		public function createAccount( email:String, password:String, first_name:String, last_name:String ):URLLoader
 		{
@@ -167,7 +200,7 @@ package org.hamster.dropbox
 			return urlLoader;			
 		}	
 		/**
-		 * xperiments UPDATE 
+		 * @private
 		 */		
 		private function createAccountCompleteHandler(evt:Event):void
 		{
@@ -546,17 +579,16 @@ package org.hamster.dropbox
 								locale:String = "",
 								overwrite:Boolean = true,
 								parent_rev:String = "",
-								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
+								root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var url:String = this.buildFullURL(config.contentServer, OAuthHelper.encodeURL('/files_put/' + root + '/' + filePath + '/' + fileName), "https");
-//			var params:Object = { 
-//				"file" : fileName
-//			};
-//			
-//			//added in version 1
-//			buildOptionalParameters(params, 'locale', locale);
-//			params.overwrite = overwrite.toString();
-//			buildOptionalParameters(params, 'parent_rev', parent_rev);
+			var params:Object = { 
+			};
+			
+			//added in version 1
+			buildOptionalParameters(params, 'locale', locale);
+			params.overwrite = overwrite.toString();
+			buildOptionalParameters(params, 'parent_rev', parent_rev);
 			
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, new Object(), 
 				config.consumerKey, config.consumerSecret, 
@@ -567,18 +599,18 @@ package org.hamster.dropbox
 			if (fileTypeArray.length > 1) {
 				fileType = fileTypeArray[fileTypeArray.length - 1];
 			}
-			var m:MultipartURLLoader = new MultipartURLLoader();
+			var urlRequest:URLRequest = new URLRequest(url);
+			urlRequest.data = data;
+			urlRequest.method = URLRequestMethod.POST;
 			var contentTypeHeader:URLRequestHeader = new URLRequestHeader("Content-Type", "application/" + fileType);
-			m.requestHeaders = [urlReqHeader, contentTypeHeader];
-			m.addFile(data, fileName, 'file');
-			
-			
-			//application/x-www-form-urlencoded', 'multipart/form-data'
-			m.addEventListener(Event.COMPLETE, uploadCompleteHandler);
-			m.addEventListener(IOErrorEvent.IO_ERROR, uploadIOErrorHandler);
-			m.addEventListener(SecurityErrorEvent.SECURITY_ERROR, uploadSecurityErrorHandler);
-			m.load(url);
-			return m;
+			urlRequest.requestHeaders = [urlReqHeader, contentTypeHeader];
+			var urlLoader:URLLoader = new URLLoader(urlRequest);
+			urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			urlLoader.addEventListener(Event.COMPLETE, uploadCompleteHandler);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, uploadIOErrorHandler);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, uploadSecurityErrorHandler);
+			urlLoader.load(urlRequest);
+			return urlLoader;
 		}
 		
 		/**
@@ -781,6 +813,134 @@ package org.hamster.dropbox
 		}
 		
 		/**
+		 * Uploads large files to Dropbox in mulitple chunks. 
+		 * Also has the ability to resume if the upload is interrupted. 
+		 * This allows for uploads larger than the /files 
+		 * and /files_put maximum of 150 MB.
+		 * 
+		 * <p>This API will first to call /chunked_upload repeatly to uplaod all
+		 * chunked items, then will call /commit_chunked_upload to try to commit 
+		 * the chunked upload.  For each /chunked_upload call, the event 
+		 * <code>DropboxEvent.CHUNKED_UPLOAD_RESULT</code> or 
+		 * <code>DropboxEvent.CHUNKED_UPLOAD_FAULT</code> will be dispatched, the 
+		 * relatedObject of the dispatched event is type of ChunkedUpload.  For 
+		 * /commit_chunked_upload event, the event
+		 * <code>DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT</code> or 
+		 * <code>DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT</code> will be dispatched.</p>
+		 * 
+		 * 
+		 * <p>https://api-content.dropbox.com/1/chunked_upload?param=val</p>
+		 * <p>https://api-content.dropbox.com/1/commit_chunked_upload/<root>/<path></p>
+		 * <p>version: 1</p>
+		 * <p>methods: PUT</p>
+		 * <p>results: ChunkedUpload for each /chunked_upload call 
+		 * and DropboxFile for /commit_chunked_upload call.</p>
+		 * 
+		 * @param filePath
+		 * @param fileName
+		 * @param data
+		 * @param retryCount
+		 * @param chunkedSize
+		 * @param locale
+		 * @param overwrite
+		 * @param parent_rev
+		 * @param root
+		 * @return urlLoader
+		 */
+		public function chunkedUpload(filePath:String,
+									  fileName:String,
+									  data:ByteArray,
+									  retryCount:int = 3,
+									  chunkedSize:Number = 4194304,
+									  locale:String = "",
+									  overwrite:Boolean = true,
+									  parent_rev:String = "",
+									  root:String = DropboxConfig.DROPBOX):URLLoader
+		{
+			var url:String = this.buildFullURL(config.contentServer, 
+				OAuthHelper.encodeURL('/chunked_upload'));
+			
+			var session:ChunkedUploadSession = new ChunkedUploadSession(data, chunkedSize);
+			_chunkedUploadSessionList.push(session);
+			session.url = url;
+			session.fileName = fileName;
+			session.filePathWithName =  filePath + '/' + fileName;
+			session.root = root;
+			session.locale = locale;
+			session.overwrite = overwrite;
+			session.parent_rev = parent_rev;
+			session.retryCount = retryCount;
+			
+			return chunkedUploadNext(session);
+		}
+		
+		/**
+		 * @private
+		 * 
+		 */
+		private function commitChunkUpload(session:ChunkedUploadSession):URLLoader
+		{
+			var params:Object = new Object();
+			params = {
+				upload_id : session.uploadId
+			};
+			
+			buildOptionalParameters(params, 'locale', session.locale);
+			params.overwrite = session.overwrite.toString();
+			buildOptionalParameters(params, 'parent_rev', session.parent_rev);
+			
+			var urlRequest:URLRequest = buildURLRequest(
+				config.contentServer, '/commit_chunked_upload/' + session.root + '/' + session.filePathWithName, params, URLRequestMethod.POST);
+			return this.load(urlRequest, DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT, 
+				DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT, DROPBOX_FILE);
+		}
+		
+		private function chunkedUploadNext(session:ChunkedUploadSession, retry:Boolean = false):URLLoader
+		{
+			var nextData:ByteArray;
+			if (!retry) {
+				nextData = session.getNext();
+			} else {
+				nextData = session.retry();
+			}
+			if (nextData == null) {
+				this._chunkedUploadSessionList.splice(_chunkedUploadSessionList.indexOf(session), 1);
+				this.commitChunkUpload(session);
+				return null;
+			}
+			
+			var targetURL:String = session.url;
+			if (session.uploadId != null && session.uploadId.length > 0) {
+				targetURL += "?upload_id=" + session.uploadId;
+				targetURL += "&offset=" + session.currentOffset;
+			}
+			
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(targetURL, new Object(), 
+				config.consumerKey, config.consumerSecret, 
+				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.POST);
+			
+			var fileTypeArray:Array = session.fileName.split('.');
+			var fileType:String = "file";
+			if (fileTypeArray.length > 1) {
+				fileType = fileTypeArray[fileTypeArray.length - 1];
+			}
+			
+			var urlRequest:URLRequest = new URLRequest(targetURL);
+			urlRequest.data = nextData;
+			urlRequest.method = URLRequestMethod.PUT;
+			var contentTypeHeader:URLRequestHeader = new URLRequestHeader("Content-Type", "application/" + fileType);
+			urlRequest.requestHeaders = [urlReqHeader, contentTypeHeader];
+			var urlLoader:URLLoader = new URLLoader(urlRequest);
+			urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			urlLoader.addEventListener(Event.COMPLETE, chunkedUploadCompleteHandler);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, chunkedUploadIOErrorHandler);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, chunkedUploadSecurityErrorHandler);
+			urlLoader.load(urlRequest);
+			return urlLoader;
+		}
+		
+		
+		/**
 		 * Build a OAuth URL request.
 		 *  
 		 * @param apiHost
@@ -825,13 +985,12 @@ package org.hamster.dropbox
 								dataFormat:String = URLLoaderDataFormat.TEXT):URLLoader
 		{
 			var urlLoader:DropboxURLLoader = new DropboxURLLoader();
-			urlLoader.dataFormat = dataFormat;
-			urlLoader.eventResultType = evtResultType;
-			urlLoader.eventFaultType = evtFaultType;
-			urlLoader.resultType = resultType;
+			urlLoader.dataFormat 		= dataFormat;
+			urlLoader.eventResultType 	= evtResultType;
+			urlLoader.eventFaultType 	= evtFaultType;
+			urlLoader.resultType 		= resultType;
 			
 			urlLoader.addEventListener(Event.COMPLETE, loadCompleteHandler);
-			
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			
@@ -910,10 +1069,89 @@ package org.hamster.dropbox
 		 *  
 		 * @param evt
 		 */
+		protected function chunkedUploadCompleteHandler(evt:Event):void
+		{
+			var m:URLLoader = URLLoader(evt.target);
+			var theSession:ChunkedUploadSession;
+			for each (var session:ChunkedUploadSession in this._chunkedUploadSessionList) {
+				if (session.relatedLoader == m) {
+					theSession = session;
+					break;
+				}
+			}
+			
+			var chunkedUpload:ChunkedUpload = new ChunkedUpload();
+			chunkedUpload.decode(com.adobe.serialization.json.JSON.decode(m.data));
+			
+			if (session.uploadId == null || session.uploadId == "") {
+				session.uploadId = chunkedUpload.uploadId;
+			}
+			
+			this.dispatchDropboxEvent(DropboxEvent.CHUNKED_UPLOAD_RESULT, evt, chunkedUpload);
+			
+			this.chunkedUploadNext(session);
+		}
+		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request.
+		 *  
+		 * @param evt
+		 * 
+		 */
+		protected function chunkedUploadIOErrorHandler(evt:IOErrorEvent):void
+		{
+			var urlLoader:URLLoader = URLLoader(evt.target);
+			var theSession:ChunkedUploadSession;
+			for each (var session:ChunkedUploadSession in this._chunkedUploadSessionList) {
+				if (session.relatedLoader == urlLoader) {
+					theSession = session;
+				}
+			}
+			if (theSession.retryCount > 0) {
+				theSession.retryCount--;
+				this.chunkedUploadNext(theSession, true);
+			} else {
+				this._chunkedUploadSessionList.splice(_chunkedUploadSessionList.indexOf(session), 1);
+				this.dispatchDropboxEvent(DropboxEvent.CHUNKED_UPLOAD_FAULT, evt, urlLoader.data);
+			}
+		}
+		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request.
+		 *  
+		 * @param evt
+		 * 
+		 */
+		protected function chunkedUploadSecurityErrorHandler(evt:SecurityErrorEvent):void
+		{
+			var urlLoader:URLLoader = URLLoader(evt.target);
+			var theSession:ChunkedUploadSession;
+			for each (var session:ChunkedUploadSession in this._chunkedUploadSessionList) {
+				if (session.relatedLoader == urlLoader) {
+					theSession = session;
+				}
+			}
+			this._chunkedUploadSessionList.splice(_chunkedUploadSessionList.indexOf(session), 1);
+			this.dispatchDropboxEvent(DropboxEvent.CHUNKED_UPLOAD_FAULT, evt, urlLoader.data);
+		}
+		
+		/**
+		 * @private
+		 * 
+		 * Listener for upload request. 
+		 *  
+		 * @param evt
+		 */
 		protected function uploadCompleteHandler(evt:Event):void
 		{
-			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
-			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_RESULT, evt, m.loader.data);
+			var m:URLLoader = URLLoader(evt.target);
+			var dropboxFile:DropboxFile = new DropboxFile();
+			dropboxFile.decode(com.adobe.serialization.json.JSON.decode(m.data));
+			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_RESULT, evt, dropboxFile);
 		}
 		
 		/**
@@ -926,8 +1164,8 @@ package org.hamster.dropbox
 		 */
 		protected function uploadIOErrorHandler(evt:IOErrorEvent):void
 		{
-			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
-			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.loader.data);
+			var m:URLLoader = URLLoader(evt.target);
+			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.data);
 		}
 		
 		/**
@@ -940,8 +1178,8 @@ package org.hamster.dropbox
 		 */
 		protected function uploadSecurityErrorHandler(evt:SecurityErrorEvent):void
 		{
-			var m:MultipartURLLoader = MultipartURLLoader(evt.target);
-			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.loader.data);
+			var m:URLLoader = URLLoader(evt.target);
+			this.dispatchDropboxEvent(DropboxEvent.PUT_FILE_FAULT, evt, m.data);
 		}
 		
 		/**
@@ -983,7 +1221,7 @@ package org.hamster.dropbox
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, urlLoader.data);
 		}
-			
+		
 		/**
 		 * build full URL string by given values.
 		 *  
