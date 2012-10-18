@@ -23,12 +23,12 @@ package org.hamster.dropbox.test
 	
 	public class DropboxClientTest
 	{
-		private var consumerKey:String         = "xs1b9kygh7gz96v";
-		private var consumerSecret:String      = "fsg0iv0hqyh02yd";
-		private var requestTokenKey:String     = "8ntx6hhyuxg9cfv";
-		private var requestTokenSecret:String  = "sc5ic82mhjncv7u";
-		private var accessTokenKey:String      = "m11tpfwi1d87q6d";
-		private var accessTokenSecret:String   = "niewgnxsvgdof8e";
+		private var consumerKey:String         = "";
+		private var consumerSecret:String      = "";
+		private var requestTokenKey:String     = "";
+		private var requestTokenSecret:String  = "";
+		private var accessTokenKey:String      = "";
+		private var accessTokenSecret:String   = "";
 		
 		protected var dropboxConfig:DropboxConfig;
 		protected var dropboxClient:DropboxClient;
