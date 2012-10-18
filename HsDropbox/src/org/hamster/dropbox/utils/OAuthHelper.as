@@ -9,6 +9,8 @@ package org.hamster.dropbox.utils
 	import flash.net.URLRequestMethod;
 	import flash.utils.ByteArray;
 	
+	import org.hamster.dropbox.DropboxClient;
+	
 	/**
 	 * a refactor util class from org.iotashan.oauth.OAuthRequest
 	 * 
@@ -17,6 +19,29 @@ package org.hamster.dropbox.utils
 	 */
 	public class OAuthHelper
 	{
+		public static const CHARACTER_ENCODING_MAPPING:Array = [
+			{charFrom : '#', charTo : '%23'},
+			{charFrom : '$', charTo : '%24'},
+			{charFrom : '(', charTo : '%28'},
+			{charFrom : ')', charTo : '%29'},
+			{charFrom : "'", charTo : '%27'},
+			{charFrom : "@", charTo : '%40'},
+			{charFrom : "+", charTo : '%2B'},
+			{charFrom : "!", charTo : '%21'},
+			{charFrom : "`", charTo : '%60'},
+			{charFrom : "^", charTo : '%5E'},
+			{charFrom : "&", charTo : '%26'},
+			{charFrom : "=", charTo : '%3D'},
+			{charFrom : "+", charTo : '%2B'},
+			{charFrom : "{", charTo : '%7B'},
+			{charFrom : "}", charTo : '%7D'},
+			{charFrom : "[", charTo : '%5B'},
+			{charFrom : "]", charTo : '%5D'},
+			{charFrom : ";", charTo : '%3B'},
+			{charFrom : ",", charTo : '%2C'},
+		];
+		
+		
 		public function OAuthHelper()
 		{
 		}
@@ -206,7 +231,7 @@ package org.hamster.dropbox.utils
 			// loop over params, find the ones we need
 			for (var param:String in params) {
 				if (param != "oauth_signature" && param != "locale" && param != 'overwrite') {
-					aParams.push(param + "=" + encodeParam(params[param].toString()));
+					aParams.push(param + "=" + encodeURICharacter(params[param].toString()).split('/').join('%2F'));
 				}
 			}
 			// put them in the right order
@@ -219,23 +244,21 @@ package org.hamster.dropbox.utils
 		
 		public static function encodeURL(url:String):String
 		{
-			var protocol:String = getProtocol(url);
-			var tempURL:String = url.substring(protocol.length + 3);
-			
-			var paths:Array = tempURL.split('/');
-			for (var i:int = 0; i < paths.length; i++) {
-				paths[i] = escape(paths[i]).split('@').join("%40").split("+").join("%2B");
-			}
-			return protocol + "://" + paths.join('%2F');
+			return encodeURICharacter(url).split('~').join('%7E');
 		}
 		
-		private static function encodeParam(param:String):String
+		
+		public static function encodeURICharacter(url:String):String
 		{
-			var paths:Array = param.split('/');
+			var paths:Array = url.split('/');
 			for (var i:int = 0; i < paths.length; i++) {
-				paths[i] = escape(paths[i]);
+				var str:String = encodeURI(paths[i]);
+				for each (var charObj:Object in CHARACTER_ENCODING_MAPPING) {
+					str = str.split(charObj.charFrom).join(charObj.charTo);
+				}
+				paths[i] = str;
 			}
-			return paths.join('%2F').split('@').join("%40").split("+").join("%2B");
+			return paths.join('/');
 		}
 		
 		public static function getProtocol(url:String):String
@@ -292,7 +315,7 @@ package org.hamster.dropbox.utils
 			
 			uid[index++] = 45; // charCode for "-"
 			
-			var time:Number = new Date().getTime();
+			var time:Number = new Date().time;
 			// Note: time is the number of milliseconds since 1970,
 			// which is currently more than one trillion.
 			// We use the low 8 hex digits of this number in the UID.

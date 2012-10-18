@@ -93,16 +93,6 @@ package org.hamster.dropbox
 	 */
 	public class DropboxClient extends EventDispatcher
 	{
-		public static const CHARACTER_ENCODING_MAPPING:Array = [
-			{charFrom : '#', charTo : '%23'},
-			{charFrom : '$', charTo : '%24'},
-			{charFrom : '(', charTo : '%28'},
-			{charFrom : ')', charTo : '%29'},
-			{charFrom : "'", charTo : '%27'},
-			{charFrom : "@", charTo : '%40'},
-			{charFrom : "+", charTo : '%2B'},
-		];
-		
 		protected static const REQUEST_TOKEN:String = 'request_token';
 		protected static const ACCESS_TOKEN:String = 'access_token';
 		protected static const ACCOUNT_INFO:String = 'account_info';
@@ -402,7 +392,7 @@ package org.hamster.dropbox
 			var urlRequest:URLRequest = buildURLRequest(
 				config.server, "/fileops/delete", params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.FILE_DELETE_RESULT, 
-				DropboxEvent.FILE_DELETE_FAULT, "");
+				DropboxEvent.FILE_DELETE_FAULT, DROPBOX_FILE);
 		}
 		
 		/** 
@@ -558,22 +548,32 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):MultipartURLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, '/files/' + root + '/' + encodeURL(filePath));
-			var params:Object = { 
-				"file" : fileName
-			};
+			var url:String = this.buildFullURL(config.contentServer, OAuthHelper.encodeURL('/files_put/' + root + '/' + filePath + '/' + fileName), "https");
+//			var params:Object = { 
+//				"file" : fileName
+//			};
+//			
+//			//added in version 1
+//			buildOptionalParameters(params, 'locale', locale);
+//			params.overwrite = overwrite.toString();
+//			buildOptionalParameters(params, 'parent_rev', parent_rev);
 			
-			//added in version 1
-			buildOptionalParameters(params, 'locale', locale);
-			params.overwrite = overwrite.toString();
-			buildOptionalParameters(params, 'parent_rev', parent_rev);
-			
-			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, new Object(), 
 				config.consumerKey, config.consumerSecret, 
 				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.POST);
+			
+			var fileTypeArray:Array = fileName.split('.');
+			var fileType:String = "file";
+			if (fileTypeArray.length > 1) {
+				fileType = fileTypeArray[fileTypeArray.length - 1];
+			}
 			var m:MultipartURLLoader = new MultipartURLLoader();
-			m.requestHeaders = [urlReqHeader];
+			var contentTypeHeader:URLRequestHeader = new URLRequestHeader("Content-Type", "application/" + fileType);
+			m.requestHeaders = [urlReqHeader, contentTypeHeader];
 			m.addFile(data, fileName, 'file');
+			
+			
+			//application/x-www-form-urlencoded', 'multipart/form-data'
 			m.addEventListener(Event.COMPLETE, uploadCompleteHandler);
 			m.addEventListener(IOErrorEvent.IO_ERROR, uploadIOErrorHandler);
 			m.addEventListener(SecurityErrorEvent.SECURITY_ERROR, uploadSecurityErrorHandler);
@@ -794,7 +794,7 @@ package org.hamster.dropbox
 									    httpMethod:String = URLRequestMethod.GET,
 									    protocol:String = 'http'):URLRequest
 		{
-			target  = encodeURL(target);
+			target  = OAuthHelper.encodeURL(target);
 			var url:String = this.buildFullURL(apiHost, target, protocol);
 			
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
@@ -807,19 +807,6 @@ package org.hamster.dropbox
 			urlRequest.data = URLUtil.objectToString(params, '&');
 			urlRequest.url = url;
 			return urlRequest;
-		}
-		
-		private static function encodeURL(url:String):String
-		{
-			var paths:Array = url.split('/');
-			for (var i:int = 0; i < paths.length; i++) {
-				var str:String = encodeURI(paths[i]);
-				for each (var charObj:Object in CHARACTER_ENCODING_MAPPING) {
-					str = str.split(charObj.charFrom).join(charObj.charTo);
-				}
-				paths[i] = str;
-			}
-			return paths.join('/');
 		}
 		
 		/**
