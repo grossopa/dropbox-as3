@@ -83,7 +83,7 @@ package org.hamster.dropbox.models
 			s	+=  ", revision=" + (revision == null ? "null" : revision) 
 			s	+=  ", isDeleted=" + isDeleted
 			s	+=  ", icon=" + (icon == null ? "null" : icon)
-			s	+=  ", isDir=" + isDir == null
+			s	+=  ", isDir=" + isDir
 			s	+=  ", mimeType=" + (mimeType == null ? "null" : mimeType)
 			s	+=  ", modified=" + (modified == null ? "null" : modified.toString())
 			s	+=  ", root=" + (root == null ? "null" : root)

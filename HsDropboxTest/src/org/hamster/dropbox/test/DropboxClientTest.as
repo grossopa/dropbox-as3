@@ -172,7 +172,7 @@ package org.hamster.dropbox.test
 		/************************************************
 		 ** Following is the api test cases            **
 		 ************************************************/
-		[Test(async, order=10)]
+		[Test(async, order=100)]
 		public function testFileCreateFolder():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.FILE_CREATE_FOLDER_RESULT, 
@@ -180,15 +180,31 @@ package org.hamster.dropbox.test
 			dropboxClient.fileCreateFolder(FOLDER);
 		}
 		
-		[Test(async, order=11)]
+		[Test(async, order=110)]
 		public function testMetadata_getFolder():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.METADATA_RESULT, 
 				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
-			dropboxClient.metadata(FOLDER, 10,"", true);
+			dropboxClient.metadata(FOLDER, 10, "", true);
 		}
 		
-		[Test(async, order=12)]
+		[Test(async, order=111)]
+		public function testMetadata_getFolderMetadataNotModified():void
+		{
+			dropboxClient.addEventListener(DropboxEvent.METADATA_RESULT_NOT_MODIFIED, 
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, null));
+			dropboxClient.metadata(FOLDER, 10, lastDropboxFile.hash, true);
+		}
+		
+		[Test(async, order=112)]
+		public function testMetadata_getFolderMetadataModified():void
+		{
+			dropboxClient.addEventListener(DropboxEvent.METADATA_RESULT, 
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
+			dropboxClient.metadata(FOLDER, 10, lastDropboxFile.hash + "123", true);
+		}
+		
+		[Test(async, order=120)]
 		public function testPutFile():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
@@ -197,7 +213,7 @@ package org.hamster.dropbox.test
 		}
 		
 			
-		[Test(async, order=13)]
+		[Test(async, order=130)]
 		public function testGetFile_getFile():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.METADATA_RESULT, 
@@ -205,7 +221,7 @@ package org.hamster.dropbox.test
 			dropboxClient.metadata(FOLDER_FILE, 0, "", false);
 		}
 		
-		[Test(async, order=14)]
+		[Test(async, order=140)]
 		public function testFileCopy():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.FILE_COPY_RESULT, 
@@ -213,7 +229,7 @@ package org.hamster.dropbox.test
 			dropboxClient.fileCopy(FOLDER_FILE, FOLDER_FILE_2);
 		}
 		
-		[Test(async, order=15)]
+		[Test(async, order=150)]
 		public function testFileMove():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.FILE_MOVE_RESULT, 
@@ -221,7 +237,7 @@ package org.hamster.dropbox.test
 			dropboxClient.fileMove(FOLDER_FILE_2, FOLDER_FILE_3);
 		}
 		
-		[Test(async, order=16)]
+		[Test(async, order=160)]
 		public function testDeleteFile():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.FILE_DELETE_RESULT, 
@@ -229,7 +245,7 @@ package org.hamster.dropbox.test
 			dropboxClient.fileDelete(FOLDER_FILE_3);
 		}
 		
-		[Test(async, order=17)]
+		[Test(async, order=170)]
 		public function testMetadata_deletedFile():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.METADATA_RESULT, 
@@ -237,7 +253,7 @@ package org.hamster.dropbox.test
 			dropboxClient.metadata(FOLDER_FILE_3, 0, "", false, true);
 		}
 		
-		[Test(async, order=18)]
+		[Test(async, order=180)]
 		public function testRestore():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.RESTORE_RESULT, 
@@ -245,7 +261,7 @@ package org.hamster.dropbox.test
 			dropboxClient.restore(FOLDER_FILE_3, lastDropboxFile.rev);
 		}
 		
-		[Test(async, order=20)]
+		[Test(async, order=200)]
 		public function testSearch():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.SEARCH_RESULT, 
@@ -253,7 +269,7 @@ package org.hamster.dropbox.test
 			dropboxClient.search(FOLDER, "1");
 		}
 		
-		[Test(async, order=21)]
+		[Test(async, order=210)]
 		public function testRevisions():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.REVISION_RESULT, 
@@ -261,7 +277,7 @@ package org.hamster.dropbox.test
 			dropboxClient.revisions(FOLDER_FILE);
 		}
 		
-		[Test(async, order=22)]
+		[Test(async, order=220)]
 		public function testPutFile_putImage():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
@@ -269,7 +285,7 @@ package org.hamster.dropbox.test
 			dropboxClient.putFile(FOLDER, FILE_IMAGE, uploadContentImage);
 		}
 		
-		[Test(async, order=23)]
+		[Test(async, order=230)]
 		public function testThumbnails():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.THUMBNAILS_RESULT, 
@@ -277,7 +293,7 @@ package org.hamster.dropbox.test
 			dropboxClient.thumbnails(FOLDER_IMAGE, "medium");
 		}
 		
-		[Test(async, order=24)]
+		[Test(async, order=240)]
 		public function testShares():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.SHARES_RESULT, 
@@ -286,14 +302,14 @@ package org.hamster.dropbox.test
 		}
 
 		
-		[Test(async, order=25)]
+		[Test(async, order=250)]
 		public function testCopyRef():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.COPY_REF_RESULT, 
 				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: CopyRef}));
 			dropboxClient.copyRef(FOLDER_FILE);
 		}
-		[Test(async, order=26)]
+		[Test(async, order=260)]
 		public function testDelta():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.DELTA_RESULT, 
@@ -301,7 +317,7 @@ package org.hamster.dropbox.test
 			dropboxClient.delta();
 		}
 		
-		[Test(async, order=27)]
+		[Test(async, order=270)]
 		public function testMedia():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.MEDIA_RESULT, 
@@ -309,7 +325,7 @@ package org.hamster.dropbox.test
 			dropboxClient.media(FOLDER_IMAGE);
 		}
 		
-		[Test(async, order=40)]
+		[Test(async, order=400)]
 		public function testChunkedUpload():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.CHUNKED_UPLOAD_RESULT, function (event:DropboxEvent):void {
@@ -321,7 +337,7 @@ package org.hamster.dropbox.test
 			dropboxClient.chunkedUpload(FOLDER, FILE_CHUNK_IMAGE, uploadContentImage, 50000);
 		}
 		
-		[Test(async, order=99)]
+		[Test(async, order=999)]
 		public function testDeleteFile_clean():void
 		{
 			dropboxClient.addEventListener(DropboxEvent.FILE_DELETE_RESULT, 

@@ -6,6 +6,7 @@ package org.hamster.dropbox
 	import flash.errors.IOError;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
@@ -50,6 +51,7 @@ package org.hamster.dropbox
 	[Event(name="DropboxEvent_GetFileResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_GetFileFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_MetadataResult", type="org.hamster.dropbox.DropboxEvent")]
+	[Event(name="DropboxEvent_MetadataResultNotModified", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_MetadataFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_RevisionResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_RevisionFault",  type="org.hamster.dropbox.DropboxEvent")]
@@ -467,7 +469,7 @@ package org.hamster.dropbox
 		 * 
 		 * @param path
 		 * @param fileLimit
-		 * @param hash pass a hash value to perform better performance
+		 * @param hash
 		 * @param list if query a directory, true to show sub list.
 		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @param include_deleted optional, added in v1
@@ -484,11 +486,19 @@ package org.hamster.dropbox
 								 locale:String = "",
 								 root:String = DropboxConfig.DROPBOX):URLLoader
 		{
-			var params:Object = {
-				"file_limit" : fileLimit,
-				"hash": hash,
-				"list": list
-			};
+			var params:Object;
+			if (hash != null && hash.length > 0) {
+				params = {
+					"hash": hash,
+					"list": true
+				};
+			} else {
+				params = {
+					"file_limit" : fileLimit,
+					"list": list
+				};
+			}
+			
 			
 			// added in v1
 			if (include_deleted == true)
@@ -498,8 +508,28 @@ package org.hamster.dropbox
 			
 			var urlRequest:URLRequest = buildURLRequest(
 				config.server, '/metadata/' + root + '/' + path, params);
-			return this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
+			var urlLoader:URLLoader = this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
+			// add for hash functions
+			urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, metadataHttpStatusHandler);
+			return urlLoader;
+		}
+		
+		protected function metadataHttpStatusHandler(event:HTTPStatusEvent):void
+		{
+			if (event.status == 304) {
+				var urlLoader:URLLoader = event.currentTarget as URLLoader;
+				
+				// clean the events
+				urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+				urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+				
+				// since the complete will still be triggered and it will finally dispatch an empty stream ioErrorEvent, so here
+				// to register an empty handler to discard the ioErrorEvent.
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandlerDoNothing);
+					
+				this.dispatchDropboxEvent(DropboxEvent.METADATA_RESULT_NOT_MODIFIED, event, null);
+			}
 		}
 		
 		/**
@@ -1209,6 +1239,11 @@ package org.hamster.dropbox
 		{
 			var urlLoader:DropboxURLLoader = DropboxURLLoader(evt.target);
 			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, urlLoader.data);
+		}
+		
+		protected function ioErrorHandlerDoNothing(event:IOErrorEvent):void
+		{
+			// for 304 response, do nothing
 		}
 		
 		/**

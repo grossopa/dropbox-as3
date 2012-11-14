@@ -9,12 +9,12 @@
 					   creationComplete="onCreationComplete()" showStatusBar="false">
 	<fx:Script>
 		<![CDATA[
-			import org.hamster.dropbox.test.DropboxTestSuite;
+			import org.hamster.dropbox.test.DropboxClientTest;
 			
 			public function currentRunTestSuite():Array
 			{
 				var testsToRun:Array = new Array();
-				testsToRun.push(org.hamster.dropbox.test.DropboxTestSuite);
+				testsToRun.push(org.hamster.dropbox.test.DropboxClientTest);
 				return testsToRun;
 			}
 			
