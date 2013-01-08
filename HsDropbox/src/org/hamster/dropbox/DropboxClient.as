@@ -611,7 +611,7 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):URLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, OAuthHelper.encodeURL('/files_put/' + root + '/' + filePath + '/' + fileName), "https");
+			var url:String = this.buildFullURL(config.contentServer, OAuthHelper.encodeURL('/files_put/' + root + '/' + ((filePath == null || filePath == "") ? "" : filePath + '/') + fileName), "https");
 			var params:Object = { 
 			};
 			
