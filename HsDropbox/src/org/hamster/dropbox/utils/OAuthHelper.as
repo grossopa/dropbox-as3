@@ -9,8 +9,6 @@ package org.hamster.dropbox.utils
 	import flash.net.URLRequestMethod;
 	import flash.utils.ByteArray;
 	
-	import org.hamster.dropbox.DropboxClient;
-	
 	/**
 	 * a refactor util class from org.iotashan.oauth.OAuthRequest
 	 * 
@@ -49,8 +47,8 @@ package org.hamster.dropbox.utils
 		/**
 		 * Build a OAuth Request header.
 		 *  
-		 * @param url the target URL, should not contain parameters like ?a=b&c=d
-		 * @param params parameters used in GET or POST methods.
+		 * @param url the target URL, should not contain parameters like ?a=b
+		 * @param params parameters
 		 * @param consumerKey consumer key provided by Web Service.
 		 * @param consumerSecret consumer secret of consumer key
 		 * @param tokenKey can be either access token key or request token key
@@ -290,6 +288,7 @@ package org.hamster.dropbox.utils
 		
 		private static const ALPHA_CHAR_CODES:Array = [48, 49, 50, 51, 52, 53, 54, 
 			55, 56, 57, 65, 66, 67, 68, 69, 70];
+		
 		private static function uidUtilCreateUID():String
 		{
 			var uid:Array = new Array(36);

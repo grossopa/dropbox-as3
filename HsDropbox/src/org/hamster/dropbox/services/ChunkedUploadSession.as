@@ -4,12 +4,12 @@ package org.hamster.dropbox.services
 	import flash.net.URLLoader;
 	import flash.utils.ByteArray;
 	
-	import mx.core.ByteArrayAsset;
-	
 	import org.hamster.dropbox.models.ChunkedUpload;
-	
-	import ru.inspirit.net.MultipartURLLoader;
 
+	/**
+	 * Chunked upload session, usually you don't use this class, the client itself will use 
+	 * and maintain the chunked upload session list.
+	 */
 	public class ChunkedUploadSession extends EventDispatcher
 	{
 		private const chunkedUpload:ChunkedUpload = new ChunkedUpload();
@@ -54,7 +54,7 @@ package org.hamster.dropbox.services
 			return _chunkedSize;
 		}
 		
-		public function get expires():String
+		public function get expires():Date
 		{
 			return chunkedUpload.expires;
 		}

@@ -16,8 +16,6 @@ package org.hamster.dropbox
 	import flash.net.URLRequestMethod;
 	import flash.utils.ByteArray;
 	
-	import mx.utils.URLUtil;
-	
 	import org.hamster.dropbox.models.AccountInfo;
 	import org.hamster.dropbox.models.ChunkedUpload;
 	import org.hamster.dropbox.models.CopyRef;
@@ -26,6 +24,8 @@ package org.hamster.dropbox
 	import org.hamster.dropbox.models.SharesInfo;
 	import org.hamster.dropbox.services.ChunkedUploadSession;
 	import org.hamster.dropbox.utils.OAuthHelper;
+	import org.hamster.dropbox.utils.URLUtil;
+	
 	
 	[Event(name="DropboxEvent_AccountCreateResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_AccountCreateFault", type="org.hamster.dropbox.DropboxEvent")]
@@ -67,7 +67,6 @@ package org.hamster.dropbox
 	[Event(name="DropboxEvent_DeltaFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_CopyRefResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_CopyRefFault",  type="org.hamster.dropbox.DropboxEvent")]
-	
 	[Event(name="DropboxEvent_ChunkedUploadResult", type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_ChunkedUploadFault",  type="org.hamster.dropbox.DropboxEvent")]
 	[Event(name="DropboxEvent_CommitChunkedUploadResult", type="org.hamster.dropbox.DropboxEvent")]
@@ -127,6 +126,7 @@ package org.hamster.dropbox
 		 * model type CopyRefInfo
 		 */
 		protected static const COPY_REF_INFO:String       = 'copy_ref_info';
+		
 		protected static const ACCOUNT_CREATE:String      = 'account_create';
 		
 		/**
@@ -160,7 +160,8 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * create an account.
+		 * Create an account. Deprecated because currently this api 
+		 * cannot be found from the official api support.
 		 * 
 		 * @param email
 		 * @param password
@@ -168,6 +169,7 @@ package org.hamster.dropbox
 		 * @param last_name
 		 * @return URLLoader
 		 */
+		[Deprecated]
 		public function createAccount( email:String, password:String, first_name:String, last_name:String ):URLLoader
 		{
 			var url:String = config.accountCreateUrl;
@@ -200,7 +202,8 @@ package org.hamster.dropbox
 			
 			urlLoader.load(urlRequest);
 			return urlLoader;			
-		}	
+		}
+		
 		/**
 		 * @private
 		 */		
@@ -211,9 +214,28 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * request the request token by consumer key/secret. before you call this API,
-		 * you should ensure that you have consumer key/secret pair.
-		 *  
+		 * Step 1 of authentication. Obtain an OAuth request token to be used for the rest 
+		 * of the authentication process. 
+		 * <p>This method corresponds to <a href="http://oauth.net/core/1.0/#auth_step1">Obtaining 
+		 * an Unauthorized Request Token</a> in the OAuth Core 1.0 specification.</p>
+		 * 
+		 * <p><b>Result</b></p>
+		 * <p>A request token and the corresponding request token secret, URL-encoded. 
+		 * This token/secret pair is meant to be used with /oauth/access_token to complete 
+		 * the authentication process and cannot be used for any other API calls.
+		 * See <a href="http://oauth.net/core/1.0/#rfc.section.6.1.2">Service Provider Issues an Unauthorized Request Token</a>
+		 * in the OAuth Core 1.0 specification for additional discussion of the values returned 
+		 * when fetching a request token.</p>
+		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.REQUEST_TOKEN_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.REQUEST_TOKEN_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/oauth/request_token</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * </table>
+		 * 
 		 * @return urlLoader
 		 */
 		public function requestToken():URLLoader
@@ -226,9 +248,28 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * request the access token by consumer key/secret, before you call this API,
-		 * you should ensure taht you have consumer key/secret pair and request token key secret pair
-		 * and the user has go to dropbox website to allow access of application.
+		 * Step 3 of authentication. After the /oauth/authorize step is complete, 
+		 * the application can call /oauth/access_token to acquire an access token.
+		 * 
+		 * <p>This method corresponds to <a href="http://oauth.net/core/1.0/#auth_step3">
+		 * Obtaining an Access Token in the OAuth Core 1.0 specification</a>.</p>
+		 * 
+		 * <p><b>Result</b></p>
+		 * <p>A request token and the corresponding request token secret, URL-encoded. 
+		 * This token/secret pair is meant to be used with /oauth/access_token to complete 
+		 * the authentication process and cannot be used for any other API calls.
+		 * See <a href="http://oauth.net/core/1.0/#rfc.section.6.1.2">Service Provider Issues an Unauthorized Request Token</a>
+		 * in the OAuth Core 1.0 specification for additional discussion of the values returned 
+		 * when fetching a request token.</p>
+		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.ACCESS_TOKEN_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.ACCESS_TOKEN_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/oauth/access_token</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * </table>
 		 *  
 		 * @return urlLoader
 		 */
@@ -247,9 +288,11 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * The token call provides a consumer/secret key pair you can use to consistently access the user's account.
+		 * <b>Deprecated</b> since we cannot find this api from official dropbox api document.
+		 * 
+		 * <p>The token call provides a consumer/secret key pair you can use to consistently access the user's account.
 		 * This is the preferred method of authentication over storing the username and password. Use the key pair 
-		 * as a signature with every subsequent call.
+		 * as a signature with every subsequent call.</p>
 		 * 
 		 * <p>The request must be signed using the application's developer and secret key token.
 		 * Request or access tokens are necessary. </p>
@@ -261,6 +304,7 @@ package org.hamster.dropbox
 		 * @return urlLoader
 		 * 
 		 */
+		[Deprecated]
 		public function token(email:String, password:String):URLLoader
 		{
 			var url:String = config.tokenUrl;
@@ -313,7 +357,22 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * get authorization url address, return empty string if request token key is not ready.
+		 * Step 2 of authentication. Applications should direct the user to /oauth/authorize. 
+		 * This isn't an API call per see, but rather a web endpoint that lets the user sign 
+		 * in to Dropbox and choose whether to grant the application the ability to access 
+		 * files on their behalf. The page served by /oauth/authorize should be presented 
+		 * to the user through their web browser. Without the user's authorization in this step, 
+		 * it isn't possible for your application to obtain an access token from /oauth/access_token.
+		 * 
+		 * <p>This method corresponds to Obtaining User Authorization in the 
+		 * <a href="http://oauth.net/core/1.0/#auth_step2">OAuth Core 1.0 specification</a>.</p>
+		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>URL Structure</td><td>https://www.dropbox.com/1/oauth/authorize</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * </table>
 		 *  
 		 * @return authorization url address
 		 */
@@ -329,11 +388,20 @@ package org.hamster.dropbox
 		/**
 		 * Retrieves information about the user's account.
 		 * 
-		 * <p>https://api.dropbox.com/1/account/info</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: GET</p>
-		 * <p>results: User account information.</p>
+		 * <p><b>Result</b></p>
+		 * <p>User account information.</p>
 		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.ACCOUNT_INFO_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.ACCOUNT_INFO_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/account/info</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>AccountInfo</td></tr>
+		 * </table>
+		 * 
+		 * @see org.hamster.dropbox.models.AccountInfo
 		 * @return urlLoader
 		 */
 		public function accountInfo():URLLoader
@@ -347,15 +415,25 @@ package org.hamster.dropbox
 		/**
 		 * Copies a file or folder to a new location.
 		 * 
-		 * <p>https://api.dropbox.com/1/fileops/copy</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: Metadata for the copy of the file or folder.</p>
+		 * <p><b>Result</b></p>
+		 * <p>Metadata for the copy of the file or folder.</p>
 		 * 
-		 * @param fromPath
-		 * @param toPath
-		 * @param fromCopyRef optional, if it's not empty, then ignore fromPath parameter
-		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.FILE_COPY_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.FILE_COPY_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/fileops/copy</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param fromPath Specifies the file or folder to be copied from relative to root.
+		 * @param toPath Specifies the destination path, including the new name for the file or folder, relative to root.
+		 * @param root The root relative to which from_path and to_path are specified. Valid values are sandbox and dropbox.
+		 * @param fromCopyRef Specifies a copy_ref generated from a previous /copy_ref call. 
+		 *        Must be used instead of the from_path parameter.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function fileCopy(fromPath:String, toPath:String, 
@@ -382,13 +460,22 @@ package org.hamster.dropbox
 		/**
 		 * Creates a folder.
 		 * 
-		 * <p>https://api.dropbox.com/1/fileops/create_folder</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: Metadata for the new folder.</p>
+		 * <p><b>Result</b></p>
+		 * <p>Metadata for the new folder.</p>
 		 * 
-		 * @param path
-		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.FILE_CREATE_FOLDER_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.FILE_CREATE_FOLDER_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/fileops/create_folder</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param path The path to the new folder to create relative to root.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function fileCreateFolder(path:String, 
@@ -404,16 +491,25 @@ package org.hamster.dropbox
 				DropboxEvent.FILE_CREATE_FOLDER_FAULT, DROPBOX_FILE);
 		}
 		
-		/** 
+		/**
 		 * Deletes a file or folder.
 		 * 
-		 * <p>https://api.dropbox.com/1/fileops/delete</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: Metadata for the deleted file or folder.</p>
+		 * <p><b>Result</b></p>
+		 * <p>Metadata for the deleted file or folder.</p>
 		 * 
-		 * @param path full file path
-		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.FILE_DELETE_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.FILE_DELETE_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/fileops/delete</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param path The path to the file or folder to be deleted.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function fileDelete(path:String, 
@@ -430,17 +526,26 @@ package org.hamster.dropbox
 				DropboxEvent.FILE_DELETE_FAULT, DROPBOX_FILE);
 		}
 		
-		/** 
+		/**
 		 * Moves a file or folder to a new location.
 		 * 
-		 * <p>https://api.dropbox.com/1/fileops/move</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: Metadata for the moved file or folder.</p>
+		 * <p><b>Result</b></p>
+		 * <p>Metadata for the moved file or folder.</p>
 		 * 
-		 * @param fromPath
-		 * @param toPath
-		 * @param root, optional, default is "dropbox" 2011/01/22
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.FILE_MOVE_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.FILE_MOVE_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/fileops/move</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param fromPath Specifies the file or folder to be moved from relative to root.
+		 * @param toPath Specifies the destination path, including the new name for the file or folder, relative to root.
+		 * @param root The root relative to which from_path and to_path are specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function fileMove(fromPath:String, toPath:String, 
@@ -460,21 +565,46 @@ package org.hamster.dropbox
 		/**
 		 * Retrieves file and folder metadata.
 		 * 
-		 * <p>https://api.dropbox.com/1/metadata/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: GET</p>
-		 * <p>results: The metadata for the file or folder at the given &lt;path&gt;. 
-		 * If &lt;path&gt; represents a folder and the list parameter is true, 
+		 * <p><b>Result</b></p>
+		 * <p>The metadata for the file or folder at the given 
+		 * &lt;path&gt;. If &lt;path&gt; represents a folder and the list parameter is true, 
 		 * the metadata will also include a listing of metadata for the folder's contents.</p>
 		 * 
-		 * @param path
-		 * @param fileLimit
-		 * @param hash
-		 * @param list if query a directory, true to show sub list.
-		 * @param root, optional, default is "dropbox" 2011/01/22
-		 * @param include_deleted optional, added in v1
-		 * @param rev optional, added in v1
-		 * @param locale optional, added in v1
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.METADATA_RESULT</td></tr>
+		 * <tr><td>&#160;</td><td>DropboxEvent.METADATA_RESULT_NOT_MODIFIED</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.METADATA_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/metadata/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile or null if 304 not modified by hash.</td></tr>
+		 * </table>
+		 * 
+		 * @param path The path to the file or folder.
+		 * @param fileLimit Default is 10,000 (max is 25,000). When listing a folder, 
+		 *        the service will not report listings containing more than the specified amount 
+		 *        of files and will instead respond with a 406 (Not Acceptable) status response.
+		 * @param hash Each call to /metadata on a folder will return a hash field, generated by 
+		 *        hashing all of the metadata contained in that response. On later calls to /metadata,
+		 *        you should provide that value via this parameter so that if nothing has changed, the 
+		 *        response will be a 304 (Not Modified) status code instead of the full, potentially 
+		 *        very large, folder listing. This parameter is ignored if the specified path is 
+		 *        associated with a file or if list=false. A folder shared between two users will have 
+		 *        the same hash for each user.
+		 * @param list The strings true and false are valid values. true is the default. 
+		 *        If true, the folder's metadata will include a contents field with a list of 
+		 *        metadata entries for the contents of the folder. If false,
+		 *        the contents field will be omitted.
+		 * @param include_deleted Only applicable when list is set. If this parameter is set to true, 
+		 *        then contents will include the metadata of deleted children. Note that the target of 
+		 *        the metadata call is always returned even when it has been deleted (with is_deleted 
+		 *        set to true) regardless of this flag.
+		 * @param rev If you include a particular revision number, then only the metadata for 
+		 *        that revision will be returned.
+		 * @param locale The metadata returned will have its size field translated based on the given locale.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function metadata(path:String, 
@@ -515,6 +645,9 @@ package org.hamster.dropbox
 			return urlLoader;
 		}
 		
+		/**
+		 * @private
+		 */
 		protected function metadataHttpStatusHandler(event:HTTPStatusEvent):void
 		{
 			if (event.status == 304) {
@@ -545,11 +678,46 @@ package org.hamster.dropbox
 		 * @param root, optional, default is "dropbox" 2011/01/22
 		 * @return urlLoader
 		 */
-		public function thumbnails(pathToPhoto:String, size:String = "",
-								 root:String = DropboxConfig.DROPBOX):URLLoader
+		
+		/**
+		 * Gets a thumbnail for an image.
+		 * 
+		 * <p><b>Result</b></p>
+		 * <p>A thumbnail of the specified image's contents. The image returned may be larger 
+		 * or smaller than the size requested, depending on the size and aspect ratio of 
+		 * the original image.</p>
+		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.THUMBNAILS_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.THUMBNAILS_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api-content.dropbox.com/1/thumbnails/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>ByteArray of the photo</td></tr>
+		 * </table>
+		 * 
+		 * @param pathToPhoto The path to the image file you want to thumbnail.
+		 * @param size One of the following values (default: s):
+		 *        &#160;&#160;&#160;&#160;&#160;&#160;
+		 *        <table><tr><th>value</th><th>dimensions (px)</th></tr>
+		 *               <tr><td>x</td><td>32x32</td></tr>
+		 *               <tr><td>s</td><td>64x64</td></tr>
+		 *               <tr><td>m</td><td>128x128</td></tr>
+		 *               <tr><td>l</td><td>640x480</td></tr>
+		 *               <tr><td>ml</td><td>1024x768</td></tr></table>
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @param format jpeg (default) or png. For images that are photos, 
+		 *        jpeg should be preferred, while png is better for screenshots and digital art.
+		 * @return urlLoader
+		 */
+		public function thumbnails(pathToPhoto:String, size:String = "s",
+								   root:String = DropboxConfig.DROPBOX,
+								   format:String = "jpeg"):URLLoader
 		{
 			var params:Object = {
-				"size" : size
+				"size" : size,
+				"format" : format
 			};
 			var urlRequest:URLRequest = buildURLRequest(
 				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
@@ -558,24 +726,33 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Downloads a file. Note that this call goes to the api-content server.
+		 * Downloads a file.
 		 * 
-		 * <p>https://api-content.dropbox.com/1/files/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: GET</p>
-		 * <p>results: The specified file's contents at the requested revision.</p>
+		 * <p><b>Result</b></p>
+		 * <p>The specified file's contents at the requested revision.
+		 * The HTTP response contains the content metadata in JSON format 
+		 * within an x-dropbox-metadata header.</p>
 		 * 
-		 * @param filePath
-		 * @param rev
-		 * @param root, optional, default is "dropbox" 2011/01/22
-		 * @rev file revision added in v1
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.GET_FILE_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.GET_FILE_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api-content.dropbox.com/1/files/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>ByteArray of the file</td></tr>
+		 * </table>
+		 * 
+		 * @param filePath The path to the file you want to retrieve.
+		 * @param rev The revision of the file to retrieve. This defaults to the most recent revision.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
 		 * @return urlLoader
 		 */
 		public function getFile(filePath:String, rev:String = "",
 								root:String=DropboxConfig.DROPBOX):URLLoader
 		{
 			var params:Object = null;
-			if (rev != "") {
+			if (rev != "" && rev != null) {
 				params = {
 					rev : rev
 				}
@@ -587,21 +764,46 @@ package org.hamster.dropbox
 		}
 		 
 		/**
-		 * Uploads a file. Note that this call goes to the api-content server.
+		 * Uploads a file using PUT semantics.
 		 * 
-		 * <p>https://api-content.dropbox.com/1/files/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: The metadata for the uploaded file.</p>
-		 *  
-		 * @param filePath
-		 * @param fileName
-		 * @param data
-		 * @param root, optional, default is "dropbox" 2011/01/22
-		 * @param locale optional added in v1
-		 * @param overwrite optional added in v1
-		 * @param parent_rev optional added in v1
-		 * @return multipartURLLoader
+		 * <p><b>Result</b></p>
+		 * <p>Metadata for the copy of the file or folder.</p>
+		 * 
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.FILE_PUT_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.FILE_PUT_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api-content.dropbox.com/1/files_put/&lt;root&gt;/&lt;path&gt;?param=val</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>PUT,POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param filePath The path to the folder you want to write to. 
+		 *        This parameter <b>should</b> point to a folder.
+		 * @param fileName the file name you want to upload to.
+		 * @param data The file contents to be uploaded. Since the entire PUT 
+		 *        body will be treated as the file, any parameters must be passed 
+		 *        as part of the request URL. The request URL should be signed just 
+		 *        as you would sign any other OAuth request URL.
+		 * @param locale The metadata returned on successful upload will have its 
+		 *        size field translated based on the given locale.
+		 * @param overwrite This value, either true (default) or false, determines 
+		 *        what happens when there's already a file at the specified path. 
+		 *        If true, the existing file will be overwritten by the new one. 
+		 *        If false, the new file will be automatically renamed (for example, 
+		 *        test.txt might be automatically renamed to test (1).txt). The new 
+		 *        name can be obtained from the returned metadata.
+		 * @param parent_rev The revision of the file you're editing. If parent_rev
+		 *        matches the latest version of the file on the user's Dropbox, 
+		 *        that file will be replaced. Otherwise, the new file will be 
+		 *        automatically renamed (for example, test.txt might be automatically 
+		 *        renamed to test (conflicted copy).txt). If you specify a revision 
+		 *        that doesn't exist, the file will not save (error 400). Get the most 
+		 *        recent rev by performing a call to /metadata.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
+		 * @return urlLoader
 		 */
 		public function putFile(filePath:String, 
 								fileName:String, 
@@ -645,40 +847,75 @@ package org.hamster.dropbox
 		
 		/**
 		 * Obtains metadata for the previous revisions of a file.
+		 * <p>Only revisions up to thirty days old are available (or more if the 
+		 * Dropbox user has <a href="https://www.dropbox.com/help/113/en">Pack-Rat</a>). You can use the revision number in conjunction 
+		 * with the /restore call to revert the file to its previous state.</p>
+		 * <p><b>Result</b></p>
+		 * <p>A list of all revisions formatted just like file metadata.</p>
 		 * 
-		 * <p>https://api.dropbox.com/1/revisions/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: GET</p>
-		 * <p>results: A list of all revisions formatted just like file metadata.</p>
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.REVISION_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.REVISION_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/revisions/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>list of DropboxFile</td></tr>
+		 * </table>
 		 * 
 		 * @param filePathWithName
-		 * @param root optional, default is dropbox.  
+		 * @param root
+		 * @param rev_limit Default is 10. Max is 1,000. When listing a file, 
+		 *        the service will not report listings containing more than 
+		 *        the amount specified and will instead respond with a 406 
+		 *        (Not Acceptable) status response.
+		 * @param locale locale The metadata returned will have its size field 
+		 *        translated based on the given locale. 
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function revisions(filePathWithName:String,
-								  root:String = DropboxConfig.DROPBOX):URLLoader
+								  root:String = DropboxConfig.DROPBOX,
+								  rev_limit:int = 10, locale:String = ""):URLLoader
 		{
+			var params:Object = {
+				rev_limit : rev_limit
+			};
+			buildOptionalParameters(params, 'locale', locale);
+			
+			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/revisions/' + root + '/' +  filePathWithName, null);
+				config.server, '/revisions/' + root + '/' +  filePathWithName, params);
 			return this.load(urlRequest, DropboxEvent.REVISION_RESULT, 
 				DropboxEvent.REVISION_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
 		}
 		
 		/**
-		 * Restores a file path to a previous revision. 
-		 * Unlike downloading a file at a given revision and 
+		 * Restores a file path to a previous revision.
+		 * <p>Unlike downloading a file at a given revision and 
 		 * then re-uploading it, this call is atomic. 
-		 * It also saves a bunch of bandwidth.
+		 * It also saves a bunch of bandwidth.</p>
 		 * 
-		 * <p>https://api.dropbox.com/1/restore/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: A list of all revisions formatted just like file metadata.</p>
+		 * <p><b>Result</b></p>
+		 * <p>The metadata of the restored file.</p>
 		 * 
-		 * @param filePathWithName
-		 * @param rev revision to restore
-		 * @param locale optional
-		 * @param root optional, default is dropbox.
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.RESTORE_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.RESTORE_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/restore/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param filePathWithName The revision of the file to restore.
+		 * @param rev The revision of the file to restore.
+		 * @param locale The metadata returned will have its size field 
+		 *        translated based on the given locale. 
+		 * @param root The root relative to which path is specified. Valid values 
+		 *        are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function restore(filePathWithName:String,
@@ -699,21 +936,33 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Returns metadata for all files and folders that match the 
-		 * search query. Searches are limited to the folder path and 
-		 * its sub-folder hierarchy provided in the call.
+		 * Returns metadata for all files and folders whose filename 
+		 * contains the given search string as a substring.
+		 * <p>Searches are limited to the folder path and its sub-folder hierarchy provided in the call.</p>
 		 * 
-		 * <p>https://api.dropbox.com/1/search/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 1</p>
-		 * <p>methods: GET, POST</p>
-		 * <p>results: List of metadata entries for any matching files and folders.</p>
+		 * <p><b>Result</b></p>
+		 * <p>List of metadata entries for any matching files and folders.</p>
 		 * 
-		 * @param filePathWithName
-		 * @param rev revision to restore
-		 * @param locale optional
-		 * @param root optional, default is dropbox.
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.SEARCH_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.SEARCH_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/search/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>GET,POST</td></tr>
+		 * <tr><td>Result</td><td>List of DropboxFile</td></tr>
+		 * </table>
+		 * 
+		 * @param filePath The path to the folder you want to search from.
+		 * @param query The search string. Must be at least three characters long.
+		 * @param file_limit The maximum and default value is 1,000. No more than 
+		 *        file_limit search results will be returned.
+		 * @param include_deleted If this parameter is set to true, then files and 
+		 *        folders that have been deleted will also be included in the search.
+		 * @param root The metadata returned will have its size field translated 
+		 *        based on the given locale. 
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
-		 * 
 		 */
 		public function search(filePath:String, 
 							   query:String,
@@ -735,44 +984,70 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Creates and returns a shareable link to files or folders. 
-		 * Note: Links created by the /shares API call expire after thirty days.
+		 * Creates and returns a Dropbox link to files or folders users can 
+		 * use to view a preview of the file in a web browser.
 		 * 
-		 * <p>https://api.dropbox.com/1/shares/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 0,1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: A shareable link to the file or folder. 
-		 * The link can be used publicly and directs to a preview page 
-		 * of the file. Also returns the link's expiration date 
-		 * in Dropbox's usual date format.</p>
+		 * <p><b>Result</b></p>
+		 * <p>A Dropbox link to the given path. The link can be used publicly 
+		 * and directs to a preview page of the file. For compatibility reasons, 
+		 * it returns the link's expiration date in Dropbox's usual date format.
+		 *  All links are currently set to expire far enough in the future so that 
+		 * expiration is effectively not an issue.</p>
 		 * 
-		 * @param filePathWithName
-		 * @param root optional, default is dropbox.
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.SHARES_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.SHARES_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/shares/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>0,1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>SharesInfo</td></tr>
+		 * </table>
+		 * 
+		 * @param filePathWithName The path to the file or folder you want to link to.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @param short_url When true (default), the url returned will be shortened using the Dropbox 
+		 *        url shortener. If false, the url will link directly to the file's preview page.
+		 * @param locale Use to specify language settings for user error messages and other language specific text.
+		 * @see org.hamster.dropbox.models.SharesInfo
 		 * @return urlLoader
 		 */
 		public function shares(filePathWithName:String,
-							   root:String = DropboxConfig.DROPBOX):URLLoader
+							   root:String = DropboxConfig.DROPBOX,
+							   short_url:Boolean = true,
+							   locale:String = ""):URLLoader
 		{
+			var params:Object = {
+				short_url : short_url
+			};
+			buildOptionalParameters(params, 'locale', locale);
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/shares/' + root + '/' +  filePathWithName, null);
+				config.server, '/shares/' + root + '/' +  filePathWithName, params);
 			return this.load(urlRequest, DropboxEvent.SHARES_RESULT, 
 				DropboxEvent.SHARES_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
 		
 		/**
-		 * Returns a link directly to a file. Similar to /shares. 
-		 * The difference is that this bypasses the Dropbox webserver,
-		 * used to provide a preview of the file, so that you can 
-		 * effectively stream the contents of your media.
+		 * Returns a link directly to a file.
 		 * 
-		 * <p>https://api.dropbox.com/1/media/&lt;root&gt;/&lt;path&gt;</p>
-		 * <p>version: 1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: A url that serves the media directly. Also returns 
-		 * the link's expiration date in Dropbox's usual date format.</p>
+		 * <p><b>Result</b></p>
+		 * <p>A url that serves the media directly. 
+		 * Also returns the link's expiration date in Dropbox's usual date format.</p>
 		 * 
-		 * @param filePathWithName
-		 * @param root optional, default is dropbox.
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.MEDIA_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.MEDIA_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/media/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>SharesInfo</td></tr>
+		 * </table>
+		 * 
+		 * @param filePathWithName The path to the media file you want a direct link to.
+		 * @param locale Use to specify language settings for user error messages and other language specific text.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.SharesInfo
 		 * @return urlLoader
 		 */
 		public function media(filePathWithName:String,
@@ -796,13 +1071,25 @@ package org.hamster.dropbox
 		 * You can periodically call /delta to get a list of "delta entries", 
 		 * which are instructions on how to update your local state to match the server's state.
 		 * 
-		 * <p>https://api.dropbox.com/1/delta</p>
-		 * <p>version: 1</p>
-		 * <p>methods: POST</p>
-		 * <p>results: Delta information.</p>
+		 * <p><b>Result</b></p>
+		 * <p>The Delta Object. see the Delta Class for details.</p>
 		 * 
-		 * @param cursor
-		 * @param locale
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.DELTA_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.DELTA_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/delta</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>POST</td></tr>
+		 * <tr><td>Result</td><td>Delta</td></tr>
+		 * </table>
+		 * 
+		 * @param cursor A string that is used to keep track of your current state.
+		 *        On the next call pass in this value to return delta entries that 
+		 *        have been recorded since the cursor was returned.
+		 * @param locale The metadata returned will have its size field translated 
+		 *        based on the given locale. 
+		 * @see org.hamster.dropbox.models.Delta
 		 * @return urlLoader
 		 */
 		public function delta(cursor:String = null, locale:String = ""):URLLoader
@@ -818,17 +1105,28 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Creates and returns a copy_ref to a file. 
-		 * This reference string can be used to copy that file to another 
-		 * user's Dropbox by passing it in as the from_copy_ref parameter 
-		 * on /fileops/copy.
+		 * Creates and returns a copy_ref to a file. This reference string can be used 
+		 * to copy that file to another user's Dropbox by passing it in as the 
+		 * from_copy_ref parameter on /fileops/copy.
 		 * 
-		 * <p>https://api.dropbox.com/1/copy_ref/<root>/<path></p>
-		 * <p>version: 1</p>
-		 * <p>methods: GET</p>
-		 * <p>results: CopyRef information.</p>
+		 * <p><b>Result</b></p>
+		 * <p>A copy_ref to the specified file. For compatibility reasons, it returns 
+		 * the link's expiration date in Dropbox's usual date format. All links are currently 
+		 * set to expire far enough in the future so that expiration is effectively not an issue.</p>
 		 * 
-		 * @param filePathWithName
+		 * <table>
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Success Event</td><td>DropboxEvent.COPY_REF_RESULT</td></tr>
+		 * <tr><td>Failure Event</td><td>DropboxEvent.COPY_REF_FAULT</td></tr>
+		 * <tr><td>URL Structure</td><td>https://api.dropbox.com/1/copy_ref/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Methods</td><td>GET</td></tr>
+		 * <tr><td>Result</td><td>CopyRef</td></tr>
+		 * </table>
+		 * 
+		 * @param filePathWithName The path to the file you want a copy_ref to refer to.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.CopyRef
 		 * @return urlLoader
 		 */
 		public function copyRef(filePathWithName:String,
@@ -843,11 +1141,28 @@ package org.hamster.dropbox
 		}
 		
 		/**
-		 * Uploads large files to Dropbox in mulitple chunks. 
-		 * Also has the ability to resume if the upload is interrupted. 
-		 * This allows for uploads larger than the /files 
-		 * and /files_put maximum of 150 MB.
+		 * Uploads large files to Dropbox in mulitple chunks. Also has the ability to resume 
+		 * if the upload is interrupted. This allows for uploads larger than the /files and 
+		 * /files_put maximum of 150 MB.
+		 * <p>Typical usage:</p>
+		 * <p>Send a PUT request to /chunked_upload with the first chunk of the file without 
+		 * setting upload_id, and receive an upload_id in return.</p>
+		 * <p>Repeatedly PUT subsequent chunks using the upload_id to identify the upload 
+		 * in progress and an offset representing the number of bytes transferred so far.</p>
+		 * <p>After each chunk has been uploaded, the server returns a new offset representing 
+		 * the total amount transferred.</p>
+		 * <p>After the last chunk, POST to /commit_chunked_upload to complete the upload.</p>
+		 * <p>Chunks can be any size up to 150 MB. A typical chunk is 4 MB. Using large chunks 
+		 * will mean fewer calls to /chunked_upload and faster overall throughput. However, 
+		 * whenever a transfer is interrupted, you will have to resume at the beginning of 
+		 * the last chunk, so it is often safer to use smaller chunks.</p>
+		 * <p>If the offset you submit does not match the expected offset on the server, 
+		 * the server will ignore the request and respond with a 400 error that includes 
+		 * the current offset. To resume upload, seek to the correct offset (in bytes) 
+		 * within the file and then resume uploading from that point.</p>
+		 * <p>A chunked upload can take a maximum of 24 hours before expiring.</p>
 		 * 
+		 * <p><b>How to use:</b></p>
 		 * <p>This API will first to call /chunked_upload repeatly to uplaod all
 		 * chunked items, then will call /commit_chunked_upload to try to commit 
 		 * the chunked upload.  For each /chunked_upload call, the event 
@@ -858,23 +1173,46 @@ package org.hamster.dropbox
 		 * <code>DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT</code> or 
 		 * <code>DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT</code> will be dispatched.</p>
 		 * 
+		 * <p><b>Result</b></p>
+		 * <p>For DropboxEvent.CHUNKED_UPLOAD_RESULT: ChunkUpload</p>
+		 * <p>For DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT: The metadata for the uploaded file.</p>
 		 * 
-		 * <p>https://api-content.dropbox.com/1/chunked_upload?param=val</p>
-		 * <p>https://api-content.dropbox.com/1/commit_chunked_upload/<root>/<path></p>
-		 * <p>version: 1</p>
-		 * <p>methods: PUT</p>
-		 * <p>results: ChunkedUpload for each /chunked_upload call 
-		 * and DropboxFile for /commit_chunked_upload call.</p>
+		 * <table style="border-style: solid;">
+		 * <tr><th></th><th>&#160;</th></tr>
+		 * <tr><td>Chunk Success Event</td><td>DropboxEvent.CHUNKED_UPLOAD_RESULT</td></tr>
+		 * <tr><td>Chunk Failure Event</td><td>DropboxEvent.CHUNKED_UPLOAD_FAULT</td></tr>
+		 * <tr><td>Commit Success Event</td><td>DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT</td></tr>
+		 * <tr><td>Commit Failure Event</td><td>DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT</td></tr>
+		 * <tr><td>Chunk URL Structure</td><td>https://api-content.dropbox.com/1/chunked_upload?param=val</td></tr>
+		 * <tr><td>Commit URL Structure</td><td>https://api-content.dropbox.com/1/commit_chunked_upload/&lt;root&gt;/&lt;path&gt;</td></tr>
+		 * <tr><td>Version</td><td>1</td></tr>
+		 * <tr><td>Chunk Methods</td><td>PUT</td></tr>
+		 * <tr><td>Commit Methods</td><td>POST</td></tr>
+		 * <tr><td>Chunk Result</td><td>ChunkedUpload</td></tr>
+		 * <tr><td>Commit Result</td><td>DropboxFile</td></tr>
+		 * </table>
 		 * 
-		 * @param filePath
-		 * @param fileName
-		 * @param data
-		 * @param retryCount
-		 * @param chunkedSize
-		 * @param locale
-		 * @param overwrite
-		 * @param parent_rev
-		 * @param root
+		 * @param filePath The full path to the folder you want to write to. This parameter should point to a folder.
+		 * @param fileName The file name you want to point to.
+		 * @param data the upload file content
+		 * @param retryCount for all chunk upload, times of retrying if failed.
+		 * @param chunkedSize size of each time uploaded
+		 * @param locale The metadata returned on successful upload will have its 
+		 *        size field translated based on the given locale.
+		 * @param overwrite This value, either true (default) or false, determines what happens 
+		 *        when there's already a file at the specified path. If true, the existing file 
+		 *        will be overwritten by the new one. If false, the new file will be automatically 
+		 *        renamed (for example, test.txt might be automatically renamed to test (1).txt). 
+		 *        The new name can be obtained from the returned metadata.
+		 * @param parent_rev  The revision of the file you're editing. If parent_rev matches the 
+		 *        latest version of the file on the user's Dropbox, that file will be replaced. 
+		 *        Otherwise, the new file will be automatically renamed (for example, test.txt 
+		 *        might be automatically renamed to test (conflicted copy).txt). If you specify 
+		 *        a revision that doesn't exist, the file will not save (error 400). 
+		 *        Get the most recent rev by performing a call to /metadata.
+		 * @param root The root relative to which path is specified. Valid values are sandbox and dropbox.
+		 * @see org.hamster.dropbox.models.ChunkedUpload
+		 * @see org.hamster.dropbox.models.DropboxFile
 		 * @return urlLoader
 		 */
 		public function chunkedUpload(filePath:String,
@@ -894,7 +1232,7 @@ package org.hamster.dropbox
 			_chunkedUploadSessionList.push(session);
 			session.url = url;
 			session.fileName = fileName;
-			session.filePathWithName =  filePath + '/' + fileName;
+			session.filePathWithName =  (filePath == null || filePath == "" ? "" : filePath + '/') + fileName;
 			session.root = root;
 			session.locale = locale;
 			session.overwrite = overwrite;
@@ -925,6 +1263,9 @@ package org.hamster.dropbox
 				DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT, DROPBOX_FILE);
 		}
 		
+		/**
+		 * @private
+		 */
 		private function chunkedUploadNext(session:ChunkedUploadSession, retry:Boolean = false):URLLoader
 		{
 			var nextData:ByteArray;
@@ -940,14 +1281,18 @@ package org.hamster.dropbox
 			}
 			
 			var targetURL:String = session.url;
+			var params:Object = new Object();
 			if (session.uploadId != null && session.uploadId.length > 0) {
 				targetURL += "?upload_id=" + session.uploadId;
 				targetURL += "&offset=" + session.currentOffset;
+				params.upload_id = session.uploadId;
+				params.offset = session.currentOffset;
 			}
 			
-			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(targetURL, new Object(), 
+			
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(session.url, params, 
 				config.consumerKey, config.consumerSecret, 
-				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.POST);
+				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.PUT);
 			
 			var fileTypeArray:Array = session.fileName.split('.');
 			var fileType:String = "file";
@@ -966,6 +1311,7 @@ package org.hamster.dropbox
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, chunkedUploadIOErrorHandler);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, chunkedUploadSecurityErrorHandler);
 			urlLoader.load(urlRequest);
+			session.relatedLoader = urlLoader;
 			return urlLoader;
 		}
 		
@@ -1241,6 +1587,9 @@ package org.hamster.dropbox
 			this.dispatchDropboxEvent(urlLoader.eventFaultType, evt, urlLoader.data);
 		}
 		
+		/**
+		 * @private
+		 */
 		protected function ioErrorHandlerDoNothing(event:IOErrorEvent):void
 		{
 			// for 304 response, do nothing
@@ -1297,13 +1646,7 @@ import flash.net.URLLoader;
 internal class DropboxURLLoader extends URLLoader
 {
 	/**
-	 * define class type of result, can be REQUEST_TOKEN|ACCESS_TOKEN|ACCOUNT_INFO|DROPBOX_FILE.
-	 * 
-	 * REQUEST_TOKEN & ACCESS_TOKEN : set to DropboxConfig when type is requestToken & accessToken.
-	 * ACCOUNT_INFO : return an AccountInfo object
-	 * DROPBOX_FILE : return an DropboxFile object
-	 * DROPBOX_FILE_LIST : return an array of DropboxFile object
-	 * others : return response string.
+	 * define class type of result.
 	 */
 	public var resultType:String;
 	

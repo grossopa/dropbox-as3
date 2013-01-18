@@ -1,9 +1,43 @@
 package org.hamster.dropbox.models
 {
+	/**
+	 * SharesInfo
+	 * 
+	 * @author yinzeshuo
+	 */
 	public class SharesInfo extends DropboxModelSupport
 	{
-		public var url:String;
-		public var expires:String;
+		private var _url:String;
+		private var _expires:Date;
+		
+		public function set expires(value:Date):void
+		{
+			this._expires = value;
+		}
+		
+		/**
+		 * Expired date of the shared url.
+		 * 
+		 * <p><b>All links are currently set to expire far enough in the future 
+		 * so that expiration is effectively not an issue.</b></p>
+		 */
+		public function get expires():Date
+		{
+			return this._expires;
+		}
+		
+		public function set url(value:String):void
+		{
+			this._url = value;
+		}
+		
+		/**
+		 * The sharing url.
+		 */
+		public function get url():String
+		{
+			return this._url;
+		}
 		
 		public function SharesInfo()
 		{
@@ -20,14 +54,14 @@ package org.hamster.dropbox.models
 			super.decode(result);
 			
 			this.url = result['url'];
-			this.expires = result['expires'];
+			this.expires = new Date(result['expires']);
 		}
 		
 		override public function toString():String 
 		{
 			var s:String = "SharesInfo [";
-			s	+=  ", url=" + (url == null || url.length == 0 ? "null" : url);
-			s	+=  ", expires=" + (expires == null || expires.length == 0 ? "null" : expires) + "]";
+			s	+=  "url=" + (url == null || url.length == 0 ? "null" : url);
+			s	+=  ", expires=" + (expires == null ? "null" : expires.toString()) + "]";
 			return s;
 		}
 	}

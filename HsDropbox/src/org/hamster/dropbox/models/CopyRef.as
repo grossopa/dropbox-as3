@@ -4,12 +4,37 @@ package org.hamster.dropbox.models
 	 * CopyRef
 	 *  
 	 * @author yinzeshuo
-	 * 
 	 */
 	public class CopyRef extends DropboxModelSupport
 	{
-		public var copy_ref:String;
-		public var expires:String;
+		private var _copy_ref:String;
+		private var _expires:Date;
+		
+		public function set copy_ref(value:String):void
+		{
+			this._copy_ref = value;
+		}
+		
+		/**
+		 * The copy_ref to the specified file. 
+		 */
+		public function get copy_ref():String
+		{
+			return this._copy_ref;
+		}
+		
+		public function set expires(value:Date):void
+		{
+			this._expires = value;
+		}
+		
+		/**
+		 * Expired date of the copy_ref.
+		 */
+		public function get expires():Date
+		{
+			return this._expires;
+		}
 		
 		
 		public function CopyRef()
@@ -22,7 +47,7 @@ package org.hamster.dropbox.models
 			super.decode(result);
 			
 			this.copy_ref = result['copy_ref'];
-			this.expires = result['expires'];
+			this.expires = new Date(result['expires']);
 		}
 		
 		override public function toString():String 

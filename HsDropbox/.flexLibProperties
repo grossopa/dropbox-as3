@@ -5,6 +5,7 @@
     <classEntry path="org.hamster.dropbox.models.CopyRef"/>
     <classEntry path="org.hamster.dropbox.services.ChunkedUploadSession"/>
     <classEntry path="org.hamster.dropbox.models.ChunkedUpload"/>
+    <classEntry path="org.hamster.dropbox.utils.URLUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

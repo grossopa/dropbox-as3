@@ -36,7 +36,7 @@ package org.hamster.dropbox.test
 		[Embed(source='test.jpg')]
 		public static var TEST_IMAGE:Class;
 		
-		public static const DEFAULT_TIMEOUT:Number = 30000;
+		public static const DEFAULT_TIMEOUT:Number = 20000;
 		public static const LONG_TIMEOUT:Number = 100000;
 		/**
 		 * < (less than)
@@ -64,6 +64,7 @@ package org.hamster.dropbox.test
 		public static const uploadContent:ByteArray = new ByteArray();
 		public static var uploadContentImage:ByteArray = new ByteArray();
 		public static var lastDropboxFile:DropboxFile;
+		public static var lastDelta:Delta;
 		
 		[Before]
 		public function setUp():void
@@ -212,6 +213,14 @@ package org.hamster.dropbox.test
 			dropboxClient.putFile(FOLDER, FILE, uploadContent);
 		}
 		
+		[Test(async, order=121)]
+		public function testPutFileRoot():void
+		{
+			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
+				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
+			dropboxClient.putFile("", FILE, uploadContent);
+		}
+		
 			
 		[Test(async, order=130)]
 		public function testGetFile_getFile():void
@@ -317,6 +326,19 @@ package org.hamster.dropbox.test
 			dropboxClient.delta();
 		}
 		
+		[Test(async, order=261)]
+		public function testDeltaNext():void
+		{
+			if (!lastDelta) {
+				trace ("last Delta is empty, we cannot continue.");
+			} else if (!lastDelta.has_more) {
+				trace ("there are no more delta, skipped the testDeltaNext.")
+			} else {
+				dropboxClient.delta(lastDelta.cursor);
+			}
+			
+		}
+		
 		[Test(async, order=270)]
 		public function testMedia():void
 		{
@@ -333,8 +355,20 @@ package org.hamster.dropbox.test
 			});
 			
 			dropboxClient.addEventListener(DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT, 
+				Async.asyncHandler(this, resultHandler, LONG_TIMEOUT * 10));
+			dropboxClient.chunkedUpload(FOLDER, FILE_CHUNK_IMAGE, uploadContentImage, 3, 50000);
+		}
+		
+		[Test(async, order=410)]
+		public function testChunkedUpload_Root():void
+		{
+			dropboxClient.addEventListener(DropboxEvent.CHUNKED_UPLOAD_RESULT, function (event:DropboxEvent):void {
+				trace ("Chunk Done : " + event.type + " " + event.resultObject);
+			});
+			
+			dropboxClient.addEventListener(DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT, 
 				Async.asyncHandler(this, resultHandler, LONG_TIMEOUT));
-			dropboxClient.chunkedUpload(FOLDER, FILE_CHUNK_IMAGE, uploadContentImage, 50000);
+			dropboxClient.chunkedUpload("", FILE_CHUNK_IMAGE, uploadContentImage, 3, 50000);
 		}
 		
 		[Test(async, order=999)]
@@ -345,25 +379,6 @@ package org.hamster.dropbox.test
 			dropboxClient.fileDelete(ROOT_FOLDER);
 		}
 
-
-//		
-//		[Test]
-//		public function testCreateAccount():void
-//		{
-//			Assert.fail("Test method Not yet implemented");
-//		}
-//		
-//		
-//		
-//		
-//		
-//		
-//		
-
-//		
-//		
-//		
-//		
 		public function resultHandler(event:DropboxEvent, passThroughData:Object):void
 		{
 			if (passThroughData) {
@@ -375,6 +390,8 @@ package org.hamster.dropbox.test
 			trace ("Success : " + event.type + " " + event.resultObject);
 			if (event.resultObject is DropboxFile) {
 				lastDropboxFile = event.resultObject as DropboxFile;
+			} else if (event.resultObject is Delta) {
+				lastDelta = event.resultObject;
 			}
 		}
 		
