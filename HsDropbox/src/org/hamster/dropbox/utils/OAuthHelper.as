@@ -17,6 +17,9 @@ package org.hamster.dropbox.utils
 	 */
 	public class OAuthHelper
 	{
+		/**
+		 * , / ? : @ & = + $ # 
+		 */
 		public static const CHARACTER_ENCODING_MAPPING:Array = [
 			{charFrom : '#', charTo : '%23'},
 			{charFrom : '$', charTo : '%24'},
@@ -26,15 +29,14 @@ package org.hamster.dropbox.utils
 			{charFrom : "@", charTo : '%40'},
 			{charFrom : "+", charTo : '%2B'},
 			{charFrom : "!", charTo : '%21'},
-			{charFrom : "`", charTo : '%60'},
-			{charFrom : "^", charTo : '%5E'},
+			// {charFrom : "`", charTo : '%60'},
+			// {charFrom : "^", charTo : '%5E'},
 			{charFrom : "&", charTo : '%26'},
 			{charFrom : "=", charTo : '%3D'},
-			{charFrom : "+", charTo : '%2B'},
-			{charFrom : "{", charTo : '%7B'},
-			{charFrom : "}", charTo : '%7D'},
-			{charFrom : "[", charTo : '%5B'},
-			{charFrom : "]", charTo : '%5D'},
+			//{charFrom : "{", charTo : '%7B'},
+			//{charFrom : "}", charTo : '%7D'},
+			//{charFrom : "[", charTo : '%5B'},
+			//{charFrom : "]", charTo : '%5D'},
 			{charFrom : ";", charTo : '%3B'},
 			{charFrom : ",", charTo : '%2C'},
 		];

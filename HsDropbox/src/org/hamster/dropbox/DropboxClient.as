@@ -813,7 +813,10 @@ package org.hamster.dropbox
 								parent_rev:String = "",
 								root:String = DropboxConfig.DROPBOX):URLLoader
 		{
-			var url:String = this.buildFullURL(config.contentServer, OAuthHelper.encodeURL('/files_put/' + root + '/' + ((filePath == null || filePath == "") ? "" : filePath + '/') + fileName), "https");
+			var url:String = this.buildFullURL(config.contentServer, 
+				OAuthHelper.encodeURL('/files_put/' + root + '/' + ((filePath == null || filePath == "") ? "" : filePath + '/') + fileName)
+				
+				, "https");
 			var params:Object = { 
 			};
 			
@@ -822,7 +825,7 @@ package org.hamster.dropbox
 			params.overwrite = overwrite.toString();
 			buildOptionalParameters(params, 'parent_rev', parent_rev);
 			
-			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, new Object(), 
+			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 
 				config.consumerKey, config.consumerSecret, 
 				config.accessTokenKey, config.accessTokenSecret, URLRequestMethod.POST);
 			
@@ -831,7 +834,19 @@ package org.hamster.dropbox
 			if (fileTypeArray.length > 1) {
 				fileType = fileTypeArray[fileTypeArray.length - 1];
 			}
-			var urlRequest:URLRequest = new URLRequest(url);
+			
+			var paramString:String = "";
+			var paramList:Array = new Array();
+			if (locale != '' && locale != null) {
+				paramList.push('locale=' + locale);
+			}
+			paramList.push('overwrite=' + overwrite);
+			if (parent_rev != '' && parent_rev != null) {
+				paramList.push('parent_rev=' + parent_rev);
+			}
+			paramString = paramList.join('&');
+			
+			var urlRequest:URLRequest = new URLRequest(url + '?' + paramString);
 			urlRequest.data = data;
 			urlRequest.method = URLRequestMethod.POST;
 			var contentTypeHeader:URLRequestHeader = new URLRequestHeader("Content-Type", "application/" + fileType);
@@ -1331,6 +1346,7 @@ package org.hamster.dropbox
 									    protocol:String = 'http'):URLRequest
 		{
 			target  = OAuthHelper.encodeURL(target);
+			//target  = encodeURI(target);
 			var url:String = this.buildFullURL(apiHost, target, protocol);
 			
 			var urlReqHeader:URLRequestHeader = OAuthHelper.buildURLRequestHeader(url, params, 

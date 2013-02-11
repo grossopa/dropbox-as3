@@ -50,12 +50,12 @@ package org.hamster.dropbox.test
 		 * * (asterisk)  `!@#$%^&()_-=+{}[];',.
 		 */
 		public static const ROOT_FOLDER:String = "test folder";
-		public static const FOLDER:String   = ROOT_FOLDER + "/test ~`!@#$%^&()_-=+{}[];',.123中文";
-		public static const FILE:String     = "test ~`!@#$%^&()_-=+{}[];',.123中文.txt";
-		public static const FILE_2:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文2.txt";
-		public static const FILE_3:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3.txt";
-		public static const FILE_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3.jpg";
-		public static const FILE_CHUNK_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文4.jpg";
+		public static const FOLDER:String   = ROOT_FOLDER + "/test ~`!@#$%^&()_-=+{}[];',.123中文àùìèé";
+		public static const FILE:String     = "test ~`!@#$%^&()_-=+{}[];',.123中文àùìèé.txt";
+		public static const FILE_2:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文2àùìèé.txt";
+		public static const FILE_3:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3àùìèé.txt";
+		public static const FILE_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3àùìèé.jpg";
+		public static const FILE_CHUNK_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文4àùìèé.jpg";
 		public static const FOLDER_FILE:String = FOLDER + "/" + FILE;
 		public static const FOLDER_FILE_2:String = FOLDER + "/" + FILE_2;
 		public static const FOLDER_FILE_3:String = FOLDER + "/" + FILE_3;
@@ -69,7 +69,7 @@ package org.hamster.dropbox.test
 		[Before]
 		public function setUp():void
 		{
-			uploadContent.writeUTF("Abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+1234567890-=");
+			uploadContent.writeUTF("Abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+1234567890-=àùìèé");
 			var quality:int = 100;
 			var jpg:JPGEncoder = new JPGEncoder(quality);
 			var bitmap:Bitmap = new TEST_IMAGE();
@@ -218,7 +218,7 @@ package org.hamster.dropbox.test
 		{
 			dropboxClient.addEventListener(DropboxEvent.PUT_FILE_RESULT, 
 				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
-			dropboxClient.putFile("", FILE, uploadContent);
+			dropboxClient.putFile("", FILE, uploadContent, "zh_CN");
 		}
 		
 			
@@ -378,7 +378,7 @@ package org.hamster.dropbox.test
 				Async.asyncHandler(this, resultHandler, DEFAULT_TIMEOUT, {clazz: DropboxFile}));
 			dropboxClient.fileDelete(ROOT_FOLDER);
 		}
-
+		
 		public function resultHandler(event:DropboxEvent, passThroughData:Object):void
 		{
 			if (passThroughData) {
