@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testrun name="" >
 <testsuite  name="Default Test Suite" project="HsDropboxTest">
-<testsuite name="org.hamster.dropbox.test:DropboxTestSuite" type="testcaseclass"/>
+<testsuite name="org.hamster.dropbox.test:DropboxClientTest" type="testcaseclass">
+<testcase name="testDelta" classname="org.hamster.dropbox.test:DropboxClientTest"/>
+</testsuite>
 </testsuite>
 <portNumber value="8765" />
 </testrun>

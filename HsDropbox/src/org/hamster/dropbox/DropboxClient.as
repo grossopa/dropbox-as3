@@ -1192,7 +1192,7 @@ package org.hamster.dropbox
 		 * <p>For DropboxEvent.CHUNKED_UPLOAD_RESULT: ChunkUpload</p>
 		 * <p>For DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT: The metadata for the uploaded file.</p>
 		 * 
-		 * <table style="border-style: solid;">
+		 * <table>
 		 * <tr><th></th><th>&#160;</th></tr>
 		 * <tr><td>Chunk Success Event</td><td>DropboxEvent.CHUNKED_UPLOAD_RESULT</td></tr>
 		 * <tr><td>Chunk Failure Event</td><td>DropboxEvent.CHUNKED_UPLOAD_FAULT</td></tr>
