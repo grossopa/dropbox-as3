@@ -108,17 +108,20 @@ package org.hamster.dropbox.models
 			
 			var e:Array = result['entries'],
 				n:int = e.length, i:int = 0, f:DropboxFile;
-			for(i;i<n;i++){
+			for (i; i < n; i++) {
 				f = new DropboxFile();
-				f.decode( e[i][1] );
-				entries.push( f );
+				if (e[i][1] != null) {
+					f.decode(e[i][1]);
+				} else {
+					f.path = e[i][0];
+					f.isDeleted = true;
+				}
+				entries.push(f);
 			}
-			//for(i;i<n;i++)
-			//	entries.push( DropboxFile.get( e[i][1] ) );
 			
-			this.reset = result['reset']=="true";
+			this.reset = result['reset'];
 			this.cursor = result['cursor'];
-			this.has_more = result['has_more']=="true";
+			this.has_more = result['has_more'];
 		}
 		
 		override public function toString():String 
