@@ -637,7 +637,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'locale', locale);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/metadata/' + root + '/' + path, params);
+				config.server, '/metadata/' + root + buildURLFilePath(path), params);
 			var urlLoader:URLLoader = this.load(urlRequest, DropboxEvent.METADATA_RESULT, 
 				DropboxEvent.METADATA_FAULT, DROPBOX_FILE);
 			// add for hash functions
@@ -720,7 +720,7 @@ package org.hamster.dropbox
 				"format" : format
 			};
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/thumbnails/" + root + '/' + pathToPhoto, params);
+				config.contentServer, "/thumbnails/" + root + buildURLFilePath(pathToPhoto), params);
 			return this.load(urlRequest, DropboxEvent.THUMBNAILS_RESULT, 
 				DropboxEvent.THUMBNAILS_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -758,7 +758,7 @@ package org.hamster.dropbox
 				}
 			}
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, "/files/" + root + '/' + filePath, params);
+				config.contentServer, "/files/" + root + buildURLFilePath(filePath), params);
 			return this.load(urlRequest, DropboxEvent.GET_FILE_RESULT, 
 				DropboxEvent.GET_FILE_FAULT, "", URLLoaderDataFormat.BINARY);
 		}
@@ -814,7 +814,7 @@ package org.hamster.dropbox
 								root:String = DropboxConfig.DROPBOX):URLLoader
 		{
 			var url:String = this.buildFullURL(config.contentServer, 
-				OAuthHelper.encodeURL('/files_put/' + root + '/' + ((filePath == null || filePath == "") ? "" : filePath + '/') + fileName)
+				OAuthHelper.encodeURL('/files_put/' + root + ((filePath == null || filePath == "") ? "/" : buildURLFilePath(filePath) + '/') + fileName)
 				
 				, "https");
 			var params:Object = { 
@@ -900,7 +900,7 @@ package org.hamster.dropbox
 			
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/revisions/' + root + '/' +  filePathWithName, params);
+				config.server, '/revisions/' + root + buildURLFilePath(filePathWithName), params);
 			return this.load(urlRequest, DropboxEvent.REVISION_RESULT, 
 				DropboxEvent.REVISION_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
 		}
@@ -945,7 +945,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'locale', locale);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/restore/' + root + '/' +  filePathWithName, params, URLRequestMethod.POST);
+				config.server, '/restore/' + root + buildURLFilePath(filePathWithName), params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.RESTORE_RESULT, 
 				DropboxEvent.RESTORE_FAULT, DROPBOX_FILE, URLLoaderDataFormat.TEXT);			
 		}
@@ -993,7 +993,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'include_deleted', include_deleted);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/search/' + root + '/' +  filePath, params, URLRequestMethod.POST);
+				config.server, '/search/' + root + buildURLFilePath(filePath), params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.SEARCH_RESULT, 
 				DropboxEvent.SEARCH_FAULT, DROPBOX_FILE_LIST, URLLoaderDataFormat.TEXT);
 		}
@@ -1037,7 +1037,7 @@ package org.hamster.dropbox
 			};
 			buildOptionalParameters(params, 'locale', locale);
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/shares/' + root + '/' +  filePathWithName, params);
+				config.server, '/shares/' + root + buildURLFilePath(filePathWithName), params);
 			return this.load(urlRequest, DropboxEvent.SHARES_RESULT, 
 				DropboxEvent.SHARES_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
@@ -1076,7 +1076,7 @@ package org.hamster.dropbox
 			}
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/media/' + root + '/' + filePathWithName, params, URLRequestMethod.POST);
+				config.server, '/media/' + root + buildURLFilePath(filePathWithName), params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.MEDIA_RESULT, 
 				DropboxEvent.MEDIA_FAULT, SHARES_INFO, URLLoaderDataFormat.TEXT);
 		}
@@ -1150,7 +1150,7 @@ package org.hamster.dropbox
 			var params:Object = new Object();
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.server, '/copy_ref/' + root + '/' + filePathWithName, null);
+				config.server, '/copy_ref/' + root + buildURLFilePath(filePathWithName), null);
 			return this.load(urlRequest, DropboxEvent.COPY_REF_RESULT, 
 				DropboxEvent.COPY_REF_FAULT, COPY_REF_INFO);
 		}
@@ -1273,7 +1273,7 @@ package org.hamster.dropbox
 			buildOptionalParameters(params, 'parent_rev', session.parent_rev);
 			
 			var urlRequest:URLRequest = buildURLRequest(
-				config.contentServer, '/commit_chunked_upload/' + session.root + '/' + session.filePathWithName, params, URLRequestMethod.POST);
+				config.contentServer, '/commit_chunked_upload/' + session.root +  buildURLFilePath(session.filePathWithName), params, URLRequestMethod.POST);
 			return this.load(urlRequest, DropboxEvent.COMMIT_CHUNKED_UPLOAD_RESULT, 
 				DropboxEvent.COMMIT_CHUNKED_UPLOAD_FAULT, DROPBOX_FILE);
 		}
@@ -1639,6 +1639,19 @@ package org.hamster.dropbox
 				protocol += "://";
 			}
 			return protocol + host + portString + (target == "" ? "" : '/' + config.apiVersion + target); 
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function buildURLFilePath(filePath:String):String
+		{
+			if (filePath == null || filePath == "") {
+				filePath = "";
+			} else if (filePath.substr(0, 1) != '/') {
+				filePath = '/' + filePath;
+			}
+			return filePath;
 		}
 		
 		private static function buildOptionalParameters(paramTarget:Object, paramName:String, paramValue:*):void

@@ -9,14 +9,12 @@
 					   creationComplete="onCreationComplete()" showStatusBar="false">
 	<fx:Script>
 		<![CDATA[
-			import org.hamster.dropbox.test.DropboxClientTest;
-			import org.flexunit.runner.Request;
+			import org.hamster.dropbox.test.DropboxTestSuite;
 			
 			public function currentRunTestSuite():Array
 			{
 				var testsToRun:Array = new Array();
-				
-				testsToRun.push(Request.methods(org.hamster.dropbox.test.DropboxClientTest,["testDelta"]));
+				testsToRun.push(org.hamster.dropbox.test.DropboxTestSuite);
 				return testsToRun;
 			}
 			

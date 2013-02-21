@@ -49,9 +49,10 @@ package org.hamster.dropbox.test
 		 * ? (question mark)
 		 * * (asterisk)  `!@#$%^&()_-=+{}[];',.
 		 */
-		public static const ROOT_FOLDER:String = "test folder";
+		public static const ROOT_FOLDER:String = "/test folder";
 		public static const FOLDER:String   = ROOT_FOLDER + "/test ~`!@#$%^&()_-=+{}[];',.123中文àùìèé";
-		public static const FILE:String     = "test ~`!@#$%^&()_-=+{}[];',.123中文àùìèé.txt";
+		//public static const FILE:String     = "test ~`!@#$%^&()_-=+{}[];',.123中文àùìèé.txt";
+		public static const FILE:String     = "Levi-Strauss - L_Identità_seminario_a_cura_di.odt";
 		public static const FILE_2:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文2àùìèé.txt";
 		public static const FILE_3:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3àùìèé.txt";
 		public static const FILE_IMAGE:String   = "test ~`!@#$%^&()_-=+{}[];',.123中文3àùìèé.jpg";
